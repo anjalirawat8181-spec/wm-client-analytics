@@ -1,16 +1,78 @@
 # KPI Dictionary
 
+## Global definitions
+
+| Term | Rule |
+|---|---|
+| Snapshot date | Last calendar day of each month |
+| Currency | INR, stored as whole rupees |
+| Active client | Account status = open AND AUM >= 100000 at the snapshot date |
+| Churned client | Active at the previous month-end, AND either closed during the month OR AUM < 100000 at this month-end |
+| Segment | Mass Affluent < 25 lakh, HNI 25 lakh to 5 crore, UHNI > 5 crore. Fixed at onboarding, never recalculated |
+| Clean data only | KPIs use only records that pass data quality checks (no duplicates, no negative amounts, no orphaned client IDs) |
+
+The single threshold of 100000 (Rs 1 lakh) is used for both "active" and "churned" everywhere in this file.
+
+## KPIs
+
 | KPI | Definition | Formula | Grain | Source table | Edge cases/rules |
 |---|---|---|---|---|---|
-| AUM | Total market value of client assets at month-end | `SUM(market_value)` | client x month | `fact_holdings_monthly` | TODO (owner: me) |
-| Net New Money | Inflows minus outflows, excluding market movement | `SUM(inflows) - SUM(outflows)` | client x month | `fact_transactions` | TODO (owner: me) |
-| Attrition Rate | Share of opening clients who churned in the month | `churned_clients / opening_clients` | month x segment | `dim_client` + `fact_holdings_monthly` | TODO (owner: me) |
-| Revenue per Client | Average fee revenue per active client | `SUM(fee_revenue) / COUNT(active clients)` | month x segment | `fact_revenue` | TODO (owner: me) |
-| Idle Cash % | Share of a client's assets held in cash | `cash_value / AUM` | client x month | `fact_holdings_monthly` + `dim_product` | TODO (owner: me) |
-| Concentration % | Share of a client's assets in their largest product | `MAX(product_value) / AUM` | client x month | `fact_holdings_monthly` | TODO (owner: me) |
-| Days Since Last Contact | Days elapsed since the client's most recent advisor interaction | `snapshot_date - MAX(interaction_date)` | client | `fact_interactions` | TODO (owner: me) |
+| AUM | Total market value of client assets at month-end | `SUM(market_value)` | client x month | `fact_holdings_monthly` | - Sum of market_value across all products, including cash, at the snapshot date<br>- Closed clients have AUM = 0 from the month after closure<br>- Negative market values are treated as dirty data, excluded, and logged<br>- Stored in rupees, reported in Rs crore on the dashboard |
+| Net New Money | Inflows minus outflows, excluding market movement | `SUM(inflows) - SUM(outflows)` | client x month | `fact_transactions` | - Counts only external flows: deposits and SIP contributions in; withdrawals and redemptions paid out<br>- Uses `fact_transactions.flow_type`: include `external_in` and `external_out`; exclude `internal` (switches between products)<br>- Excludes market gains or losses<br>- Dated by transaction date and assigned to that calendar month<br>- Can be negative; that is meaningful, not an error |
+| Attrition Rate | Share of opening clients who churned in the month | `churned_clients / opening_clients` | month x segment | `dim_client` + `fact_holdings_monthly` | - Denominator = clients active at the previous month-end<br>- Numerator = those same clients who meet the churned definition<br>- Clients who joined during the month are excluded from both numerator and denominator<br>- A client who returns later counts as churned in the month they left and as a new client when they return<br>- If the denominator = 0 for a segment, the value is NULL |
+| Revenue per Client | Average fee revenue per active client | `SUM(fee_revenue) / COUNT(active clients)` | month x segment | `fact_revenue` | - Numerator = fee revenue booked in the month for clients active at month-end<br>- Denominator = count of those same clients<br>- Revenue from clients who churned that month is excluded here and reported separately as "revenue lost"<br>- Monthly figure, not annualised<br>- If active client count = 0, the value is NULL |
+| Idle Cash % | Share of a client's assets held in cash | `cash_value / AUM` | client x month | `fact_holdings_monthly` + `dim_product` | - cash_value / AUM, where cash = products with `asset_class = 'Cash'`<br>- A client is flagged "idle" if the value is above 30% for 2 or more consecutive months<br>- Exclude clients with AUM < 100000<br>- If AUM = 0, the value is NULL, not 0 |
+| Concentration % | Share of a client's assets in their largest product | `MAX(product_value) / AUM` | client x month | `fact_holdings_monthly` | - Largest single-product value divided by AUM at the snapshot date<br>- Measured at product level, not asset class<br>- A client is flagged "concentrated" above 40%<br>- Exclude inactive clients; a client with one holding is 100%, which is valid |
+| Days Since Last Contact | Days elapsed since the client's most recent advisor interaction | `snapshot_date - MAX(interaction_date)` | client | `fact_interactions` | - Snapshot date minus the date of the latest interaction on or before the snapshot date<br>- Only interactions with `outcome = 'connected'` count; missed calls and unanswered emails do not<br>- If a client has never been contacted, use days since onboarding date<br>- Flags: "at risk" at 90+ days, "critical" at 180+ days |
 
-## Open decisions (must be made before writing SQL)
+## Decisions made
 
-1. **What counts as an "active" client?** Needed for Revenue per Client (denominator) and Attrition Rate (opening clients). For example: AUM > 0 at month-end, or at least one transaction/interaction in the period.
-2. **What AUM threshold counts as churned?** For example: AUM falls to zero, or below a small amount (or a percentage of prior peak) for N consecutive months.
+1. **Active client:** account status = open AND AUM >= 100000 (Rs 1 lakh) at the snapshot date.
+2. **Churned client:** active at the previous month-end, AND either closed during the month OR AUM < 100000 (Rs 1 lakh) at this month-end.
+
+These values are my own choices because the data is fictional. Any change must be applied consistently across this whole file and all later SQL.
+
+## Worked example: one imaginary client
+
+Snapshot used: **30 September 2026**.
+
+| Figure | Value |
+|---|---|
+| Onboarded | March 2026, with Rs 8 lakh (800000) |
+| Segment | Mass Affluent (< 25 lakh), fixed at onboarding |
+| Connected interactions | 12 April 2026, 20 June 2026 |
+| Withdrawal | Rs 6 lakh (600000) in September 2026, `flow_type = external_out` |
+| AUM, 31 Aug 2026 | Rs 8.4 lakh (840000) |
+| AUM, 30 Sep 2026 | Rs 2.4 lakh (240000) |
+| Cash share of AUM | 40% in both August and September |
+
+| KPI | Value at 30 Sep 2026 | Rule that produced it |
+|---|---|---|
+| AUM | Rs 2,40,000 (Rs 0.024 crore on the dashboard) | Sum of market_value across all products including cash; client is still open, so no zero-AUM rule applies |
+| Net New Money | -Rs 6,00,000 for September | Withdrawal is `external_out`, so it counts; dated in September; negative value is meaningful. The March onboarding deposit falls in March, not September |
+| Attrition Rate | Not a client-level value; this client contributes **0 churned** and **1 to the denominator** for Mass Affluent in September | Client was active at 31 Aug (open, 840000 >= 100000), so they are in the denominator |
+| Revenue per Client | Not a client-level value; this client counts in the Mass Affluent denominator for September | Client is active at month-end (open, 240000 >= 100000), so their September fee revenue is included and they are counted. No revenue figure was supplied, so no number can be given |
+| Idle Cash % | 40%, flagged **idle** | cash_value / AUM = 0.40; above 30% in August and September (2 consecutive months). AUM 240000 >= 100000, so not excluded |
+| Concentration % | At least 40%; exact value not determinable | Largest single product is at least the cash holding if cash is one product. See ambiguities |
+| Days Since Last Contact | 102 days, flagged **at risk** | 30 Sep minus last connected interaction 20 June (10 + 31 + 31 + 30 = 102). 102 >= 90, but < 180, so not critical |
+
+### Churn status in September 2026
+
+The client is **NOT churned** in September. They were active at 31 August (open, AUM Rs 8.4 lakh >= Rs 1 lakh). At 30 September the account is still open and AUM of Rs 2.4 lakh is still above the Rs 1 lakh threshold, so neither churn condition is met. They remain active and stay in the opening client base for October.
+
+### Ambiguities found
+
+1. **Concentration % cannot be fully computed.** The product breakdown is not given. If cash is a single product at 40% of AUM, concentration is at least 40%, and the "concentrated" flag (above 40%) depends on whether any other product exceeds it. Also, it is unstated whether cash counts as a "product" for the MAX(product_value) rule (the rule says product level, not asset class, but does not say whether cash is excluded).
+2. **Revenue per Client has no figure for this client.** No fee revenue was supplied, so only the inclusion rule can be shown.
+3. **Segment basis is unstated.** The rule says segment is fixed at onboarding but not which measure is compared with the bands. This example assumes the Rs 8 lakh onboarding amount. Boundary values (exactly 25 lakh or 5 crore) are also not assigned to a band.
+4. **Idle flag history is partly unknown.** Only August and September cash shares are given. The flag is met on those two months alone, but whether the flag is first raised in August or September (it needs 2 consecutive months) is not specified.
+5. **Withdrawal vs AUM drop.** AUM falls by exactly Rs 6 lakh (8.4 to 2.4), matching the withdrawal, which implies zero market movement and no other flows in September. This is assumed, not stated.
+6. **AUM between March and August is not given.** The client's activity status in those months (and whether they were ever near the threshold) is assumed to be active throughout.
+
+## Schema notes for Step 2
+
+- `fact_transactions` needs a `flow_type` column with allowed values: `external_in`, `external_out`, `internal`.
+- `fact_holdings_monthly` is month-end snapshots (not daily).
+- `dim_product` needs an `asset_class` column that includes a `'Cash'` value.
+- `fact_interactions` needs an `outcome` column that includes a `'connected'` value.
+- `dim_client` needs account status, onboarding date, and segment columns.
