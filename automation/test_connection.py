@@ -1,4 +1,3 @@
-"""Smoke test: confirm DATABASE_URL in .env can reach the Neon Postgres database."""
 import os
 import sys
 from pathlib import Path
@@ -23,11 +22,11 @@ def main() -> int:
         engine = create_engine(url, connect_args={"connect_timeout": 15})
         with engine.connect() as conn:
             version = conn.execute(text("select version()")).scalar()
-    except Exception as exc:  # noqa: BLE001 - friendly message for any failure
+    except Exception as exc:
         print("Could not connect to the database.")
         print("Check that the connection string is correct, includes ?sslmode=require,")
         print("and that your Neon project is active (free projects auto-suspend).")
-        print(f"\nDetails: {type(exc).__name__}: {str(exc).splitlines()[0]}")
+        print(f"\nError type: {type(exc).__name__}")
         return 1
 
     print("Connection successful!")
