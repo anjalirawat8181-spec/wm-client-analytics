@@ -1,0 +1,90 @@
+erDiagram
+    dim_advisor ||--o{ dim_client : "manages"
+    dim_advisor ||--o{ fact_interactions : "performs"
+    dim_client  ||--o{ fact_holdings_monthly : "holds"
+    dim_client  ||--o{ fact_transactions : "makes"
+    dim_client  ||--o{ fact_interactions : "receives"
+    dim_client  ||--o{ fact_revenue : "generates"
+    dim_product ||--o{ fact_holdings_monthly : "held as"
+    dim_product ||--o{ fact_transactions : "traded as"
+    dim_date    ||--o{ fact_holdings_monthly : "snapshot_date"
+    dim_date    ||--o{ fact_transactions : "txn_date"
+    dim_date    ||--o{ fact_interactions : "interaction_date"
+    dim_date    ||--o{ fact_revenue : "month_end"
+
+    dim_advisor {
+        int advisor_id PK
+        text advisor_name
+        text branch
+        text team
+        date join_date
+    }
+    dim_client {
+        int client_id PK
+        text client_name
+        int advisor_id FK
+        text segment
+        date onboarding_date
+        bigint onboarding_aum
+        text city
+        text risk_profile
+        text kyc_status
+        text account_status
+        date closed_date
+    }
+    dim_product {
+        int product_id PK
+        text product_name UK
+        text asset_class
+        text fund_house
+        numeric fee_pct
+    }
+    dim_date {
+        int date_key PK
+        date full_date UK
+        smallint year
+        smallint quarter
+        smallint month
+        text month_name
+        date month_start
+        date month_end
+        boolean is_month_end
+    }
+    fact_holdings_monthly {
+        int client_id PK, FK
+        int product_id PK, FK
+        date snapshot_date PK, FK
+        numeric units
+        bigint market_value
+    }
+    fact_transactions {
+        bigint txn_id PK
+        int client_id FK
+        int product_id FK
+        date txn_date FK
+        text txn_type
+        text flow_type
+        bigint amount
+    }
+    fact_interactions {
+        bigint interaction_id PK
+        int client_id FK
+        int advisor_id FK
+        date interaction_date FK
+        text channel
+        text outcome
+    }
+    fact_revenue {
+        int client_id PK, FK
+        date month_end PK, FK
+        bigint fee_revenue
+    }
+    dq_exceptions {
+        bigint exception_id PK
+        timestamptz detected_at
+        text source_table
+        text source_key
+        text rule_name
+        text rule_detail
+        jsonb raw_record
+    }

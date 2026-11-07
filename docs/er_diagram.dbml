@@ -1,0 +1,87 @@
+Table mart.dim_advisor {
+  advisor_id integer [pk]
+  advisor_name text [not null]
+  branch text [not null]
+  team text [not null]
+  join_date date [not null]
+}
+
+Table mart.dim_client {
+  client_id integer [pk]
+  client_name text [not null]
+  advisor_id integer [not null, ref: > mart.dim_advisor.advisor_id]
+  segment text [not null, note: 'Mass Affluent | HNI | UHNI; must match onboarding_aum']
+  onboarding_date date [not null]
+  onboarding_aum bigint [not null]
+  city text [not null]
+  risk_profile text [not null]
+  kyc_status text [not null]
+  account_status text [not null]
+  closed_date date [note: 'set exactly when account_status = closed']
+}
+
+Table mart.dim_product {
+  product_id integer [pk]
+  product_name text [not null, unique]
+  asset_class text [not null]
+  fund_house text [not null]
+  fee_pct numeric(5,2) [not null]
+}
+
+Table mart.dim_date {
+  date_key integer [pk, note: 'YYYYMMDD']
+  full_date date [not null, unique]
+  year smallint [not null]
+  quarter smallint [not null]
+  month smallint [not null]
+  month_name text [not null]
+  month_start date [not null]
+  month_end date [not null]
+  is_month_end boolean [not null]
+}
+
+Table mart.fact_holdings_monthly {
+  client_id integer [not null, ref: > mart.dim_client.client_id]
+  product_id integer [not null, ref: > mart.dim_product.product_id]
+  snapshot_date date [not null, ref: > mart.dim_date.full_date]
+  units numeric(18,4) [not null]
+  market_value bigint [not null]
+  indexes { (client_id, product_id, snapshot_date) [pk] }
+}
+
+Table mart.fact_transactions {
+  txn_id bigint [pk]
+  client_id integer [not null, ref: > mart.dim_client.client_id]
+  product_id integer [not null, ref: > mart.dim_product.product_id]
+  txn_date date [not null, ref: > mart.dim_date.full_date]
+  txn_type text [not null]
+  flow_type text [not null]
+  amount bigint [not null]
+}
+
+Table mart.fact_interactions {
+  interaction_id bigint [pk]
+  client_id integer [not null, ref: > mart.dim_client.client_id]
+  advisor_id integer [not null, ref: > mart.dim_advisor.advisor_id]
+  interaction_date date [not null, ref: > mart.dim_date.full_date]
+  channel text [not null]
+  outcome text [not null]
+}
+
+Table mart.fact_revenue {
+  client_id integer [not null, ref: > mart.dim_client.client_id]
+  month_end date [not null, ref: > mart.dim_date.full_date]
+  fee_revenue bigint [not null]
+  indexes { (client_id, month_end) [pk] }
+}
+
+Table mart.dq_exceptions {
+  exception_id bigint [pk, increment]
+  detected_at timestamptz [not null]
+  source_table text [not null]
+  source_key text
+  rule_name text [not null]
+  rule_detail text
+  raw_record jsonb
+  Note: 'No foreign keys: logged rows may be orphaned'
+}
