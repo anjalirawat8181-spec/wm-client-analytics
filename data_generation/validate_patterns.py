@@ -141,7 +141,7 @@ def main():
     c_ = h[h.asset_class == "Cash"]
     np.add.at(cash, (c_.i.values, c_.m.values), c_.market_value.values)
     mx = np.zeros((N, M))
-    t = h.groupby(["i", "m"]).market_value.max().reset_index()
+    t = h[h.asset_class != "Cash"].groupby(["i", "m"]).market_value.max().reset_index()
     mx[t.i.values, t.m.values] = t.market_value.values
     with np.errstate(all="ignore"):
         cs, cc_ = np.where(AUM > 0, cash / AUM, 0), np.where(AUM > 0, mx / AUM, 0)
@@ -150,10 +150,10 @@ def main():
     conc_f = ((cc_ > 0.40) & active).any(1)
     add("7a. Clients ever flagged idle (cash > 30% for 2+ month-ends)", f"{idle_f.mean():.1%} ({idle_f.sum():,} clients)", "6% - 12%",
         0.06 <= idle_f.mean() <= 0.12, "These clients hold uninvested cash - a cross-sell opportunity.", "IDLE_CASH_SHARE")
-    add("7b. Clients ever flagged concentrated (largest product > 40%)", f"{conc_f.mean():.1%} ({conc_f.sum():,} clients)", "5% - 15%",
-        0.05 <= conc_f.mean() <= 0.15, "These clients carry single-product risk (cash counts as a product here).", "CONCENTRATED_SHARE")
+    add("7b. Clients ever flagged concentrated (largest non-cash product > 40%)", f"{conc_f.mean():.1%} ({conc_f.sum():,} clients)", "5% - 15%",
+        0.05 <= conc_f.mean() <= 0.15, "These clients carry single-product risk (cash is excluded from the largest-product rule).", "CONCENTRATED_SHARE")
     add("7c. Clients flagged both idle and concentrated (info only)", f"{(idle_f & conc_f).sum():,} clients", "report only", True,
-        "Overlap exists because high-cash clients count as concentrated in cash.")
+        "Clients who both hold idle cash and one dominant fund.")
 
     S = {n: pd.read_csv(OUT / "staging" / f"{n}.csv") for n in ["clients", "transactions", "holdings_monthly", "interactions", "advisors", "products", "revenue"]}
     ids = set(S["clients"].client_id)
