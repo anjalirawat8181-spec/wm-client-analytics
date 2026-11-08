@@ -83,17 +83,19 @@ The same seed gives byte-identical CSVs (every file's SHA256 is recorded in `out
 - **Churn is decided before holdings are simulated**, from contact gaps only; a few clients are counted by the KPI definition in a different month than the truth file plans.
 - **Staging size is an estimate** (CSV bytes plus row overhead); the loader prints real sizes after loading.
 
-## (f) Open KPI questions
+## (f) Resolved KPI questions
 
-These are listed for decision; the KPI dictionary has not been edited.
+These questions came up while building the generator. Each is now settled in `docs/kpi_dictionary.md`, and the generator and validator follow the decisions.
 
-1. **AUM after closure.** The dictionary says closed clients have AUM = 0 "from the month after closure". The generated data has no holdings row from the closure month-end onwards, so AUM is 0 from the closure month itself. Which is intended?
-2. **Revenue lost.** Revenue from clients who churn is "reported separately as revenue lost", but a client closed during a month has no revenue row for that month (no holdings at month-end). Should revenue lost use the previous month's revenue, or an estimate for the closing month?
-3. **Concentration % counts Cash.** The rule is product level and does not exclude Cash, so high-cash (idle) clients can also be flagged concentrated. Should Cash be excluded from the largest-product rule?
-4. **Segment boundaries.** Exactly Rs 25 lakh and Rs 5 crore are not assigned in the dictionary text. The mart CHECK puts both in HNI; the generator follows that.
-5. **Attrition annualisation.** The dictionary gives a monthly rate only. The validator annualises as `1 - (1 - monthly rate)^12` over all opening client-months. A trailing-12-month definition would differ slightly.
-6. **Silent churn timing.** A client whose AUM falls below Rs 1,00,000 is "churned" in that month and cannot churn again; if the AUM later recovers, the dictionary says the client returns as new. The generator never lets silent churners recover.
-7. **Client onboarding month.** Clients who join during a month are excluded from that month's attrition. A client who joins and whose AUM is below Rs 1,00,000 at the first month-end is never active; the generator avoids this by a Rs 1.5 lakh minimum onboarding AUM.
+| Question | Decision | Recorded in docs/kpi_dictionary.md |
+|---|---|---|
+| When does AUM become 0 for a closed client? | Closed clients have no holdings rows from the closure month-end onward, so AUM is 0 from the closure month-end. | KPIs table, AUM row |
+| What is "revenue lost" for a client with no revenue row in their closing month? | Their fee revenue in the last month-end before churn, reported in the churn month. | KPIs table, Revenue per Client row |
+| Does Concentration % count the Cash product? | No. It uses the largest single non-cash product divided by AUM (AUM still includes cash); a cash-only client has NULL concentration. | KPIs table, Concentration % row; worked example; Ambiguities item 1 |
+| How is attrition annualised? | The monthly definition is kept, plus a second line: trailing 12-month attrition = clients churned in the last 12 months / clients active 12 months ago. The validator's annual figure is annualised from the monthly rate. | KPIs table, Attrition Rate row |
+| Which segment do exactly Rs 25 lakh and Rs 5 crore belong to? | HNI, matching the mart CHECK. | Global definitions, Segment row; Ambiguities item 3 |
+| Can a churned client return? | Returning clients are not simulated. | Known limitations |
+| What is the smallest onboarding AUM? | Rs 1.5 lakh, so every new client is active at their first month-end. | Known limitations |
 
 ## (g) Sanity queries to run by hand in DBeaver
 
