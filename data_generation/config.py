@@ -1,0 +1,149 @@
+"""Single source of truth for every synthetic-data parameter.
+
+All data is fictional. Money is whole rupees (int64). Change a value here,
+re-run generate.py, and every downstream file is rebuilt deterministically.
+"""
+
+SEED = 42
+
+N_CLIENTS = 5000
+SMALL_N_CLIENTS = 300
+N_ADVISORS = 60
+BRANCHES = ["Mumbai", "Delhi NCR", "Bengaluru", "Pune"]
+TEAMS_PER_BRANCH = 3
+N_PRODUCTS = 21
+
+FIRST_MONTH_END = "2025-01-31"
+N_MONTHS = 22
+CONTACT_BURNIN_MONTHS = 6
+DIM_DATE_MIN = "2024-01-01"
+DIM_DATE_MAX = "2027-12-31"
+
+ADVISOR_ID_START = 1
+PRODUCT_ID_START = 1
+CLIENT_ID_START = 10001
+TXN_ID_START = 1000001
+INTERACTION_ID_START = 5000001
+ORPHAN_ID_START = 900001
+N_ORPHAN_IDS = 300
+
+SEGMENT_MIX = {"Mass Affluent": 0.72, "HNI": 0.25, "UHNI": 0.03}
+SEGMENT_BANDS = {
+    "Mass Affluent": (150_000, 2_490_000),
+    "HNI": (2_500_000, 50_000_000),
+    "UHNI": (50_000_001, 500_000_000),
+}
+AUM_LOGNORMAL = {
+    "Mass Affluent": (500_000, 0.60),
+    "HNI": (8_000_000, 0.70),
+    "UHNI": (100_000_000, 0.60),
+}
+RISK_MIX = {"Conservative": 0.30, "Moderate": 0.45, "Aggressive": 0.25}
+KYC_MIX = {"verified": 0.88, "pending": 0.08, "expired": 0.04}
+
+PRE_WINDOW_SHARE = 0.85
+PRE_WINDOW_ONBOARD_START = "2019-01-01"
+PRE_WINDOW_ONBOARD_END = "2024-12-31"
+OPENING_AUM_FACTOR = (0.9, 1.6)
+N_SENIOR_ADVISORS = 15
+ADVISOR_LOAD_SIGMA = 0.25
+ADVISOR_JOIN_START = "2012-01-01"
+ADVISOR_JOIN_END = "2024-06-30"
+
+CASH_SHARE_NORMAL = (0.04, 0.10)
+NORMAL_CASH_BAND = (0.022, 0.118)
+NORMAL_TARGET_CAP = 0.32
+NORMAL_MAX_BAND = 0.345
+N_NONCASH_NORMAL = (3, 4)
+N_NONCASH_NORMAL_P = (0.35, 0.65)
+N_NONCASH_SPECIAL = (2, 3, 4)
+N_NONCASH_SPECIAL_P = (0.30, 0.40, 0.30)
+RISK_CLASS_WEIGHTS = {
+    "Conservative": (0.15, 0.40, 0.22, 0.15, 0.08),
+    "Moderate": (0.35, 0.25, 0.20, 0.10, 0.10),
+    "Aggressive": (0.55, 0.08, 0.12, 0.10, 0.15),
+}
+
+IDLE_CASH_SHARE = 0.08
+CONCENTRATED_SHARE = 0.06
+IDLE_CASH_TARGET = (0.40, 0.52)
+IDLE_CASH_BAND = 0.05
+IDLE_PHASE_MONTHS = (4, 10)
+CONC_DOMINANT_WEIGHT = (0.50, 0.75)
+CONC_BAND = (0.43, 0.82)
+CONC_CASH_SHARE = (0.03, 0.10)
+
+ASSET_CLASS_RETURNS = {
+    "Equity": (0.12, 0.16, 0.90),
+    "Debt": (0.07, 0.03, 0.10),
+    "Hybrid": (0.10, 0.09, 0.80),
+    "Gold": (0.09, 0.12, 0.20),
+    "Alternatives": (0.11, 0.10, 0.60),
+    "Cash": (0.035, 0.001, 0.0),
+}
+PRODUCT_NOISE_SD = 0.003
+RETURN_CLIP = 0.15
+CORRECTION_MONTH_INDEXES = (8, 9)
+CORRECTION_EQUITY_RETURN = -0.041
+CORRECTION_OTHER_FACTOR = -1.2
+
+FEE_RANGES = {
+    "Equity": (0.8, 1.8), "Debt": (0.4, 1.0), "Hybrid": (0.9, 1.5),
+    "Gold": (0.5, 0.9), "Alternatives": (1.5, 2.5), "Cash": (0.2, 0.2),
+}
+
+SIP_SHARE = {"Mass Affluent": 0.28, "HNI": 0.16, "UHNI": 0.08}
+SIP_AMOUNT = {
+    "Mass Affluent": (5_000, 25_000), "HNI": (10_000, 100_000), "UHNI": (25_000, 100_000),
+}
+SIP_MAX_SHARE_OF_ONBOARD_AUM = 0.10
+TOPUP_PROB = {"Mass Affluent": 0.03, "HNI": 0.05, "UHNI": 0.06}
+TOPUP_AMOUNT_PCT = (0.05, 0.25)
+REDEMPTION_PROB = 0.015
+REDEMPTION_AMOUNT_PCT = (0.03, 0.10)
+REDEMPTION_WITHDRAWAL_SHARE = 0.40
+REDEMPTION_MAX_PRODUCT_SHARE = 0.60
+AUM_FLOOR_FOR_OUTFLOWS = 125_000
+REBALANCE_SWITCH_PROB = 0.02
+REBALANCE_SWITCH_PCT = (0.10, 0.30)
+MIN_SWITCH_AMOUNT = 500
+MIN_ORDINARY_AMOUNT = 1_000
+
+CONTACT_BASE_RATE = {"Mass Affluent": 0.6, "HNI": 1.0, "UHNI": 1.6}
+CONTACT_RATE_SCALE = 1.3
+ADVISOR_PROPENSITY_MEAN = 1.0
+ADVISOR_PROPENSITY_SD = 0.2
+OUTCOME_MIX = {"connected": 0.60, "missed": 0.25, "no_response": 0.15}
+CHANNEL_MIX = {
+    "Mass Affluent": (0.45, 0.25, 0.05, 0.25),
+    "HNI": (0.35, 0.20, 0.25, 0.20),
+    "UHNI": (0.30, 0.10, 0.50, 0.10),
+}
+
+N_STAR_ADVISORS = 5
+N_POOR_CONTACT_ADVISORS = 5
+STAR_INFLOW_FACTOR = 1.6
+STAR_CONTACT_FACTOR = 1.3
+POOR_CONTACT_FACTOR = 0.3
+
+TARGET_ANNUAL_CHURN = 0.12
+CHURN_TOLERANCE = (0.10, 0.14)
+CONTACT_GAP_MULTIPLIER = 3.0
+CONTACT_GAP_DAYS = 90
+SEGMENT_HAZARD_MULTIPLIER = {"Mass Affluent": 1.5, "HNI": 0.8, "UHNI": 0.5}
+MIN_TENURE_MONTHS = 4
+SILENT_CHURN_SHARE = 0.15
+CHURN_AUM_THRESHOLD = 100_000
+PRE_CHURN_MONTHS = 3
+PRE_CHURN_OUTFLOW_PCT = (0.15, 0.35)
+PRE_CHURN_MIN_PCT = 0.02
+PRE_CHURN_AUM_KEEP = 122_000
+SILENT_RESIDUAL = (8_000, 70_000)
+
+DIRTY = {
+    "transactions": {"duplicate_txn_id": 0.010, "negative_amount": 0.008, "orphan_client_id": 0.008},
+    "clients": {"null_kyc_status": 0.025},
+    "holdings_monthly": {"orphan_client_id": 0.014, "negative_market_value": 0.014},
+    "interactions": {"orphan_client_id": 0.028},
+}
+MAX_STAGING_ROWS_WARNING = 1_200_000
