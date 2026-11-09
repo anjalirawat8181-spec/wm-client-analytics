@@ -184,7 +184,7 @@ def main() -> int:
                    "detection_note": "Planted-vs-caught and mart-vs-clean comparisons need the hidden answer key, which is not in CI; "
                                      f"these rows are carried forward from the local run at {old.get('detection_generated_at') or old.get('generated_at')}.",
                    "detection_generated_at": old.get("detection_generated_at") or old.get("generated_at"),
-                   "carried_scorecard": [x for x in old.get("scorecard", []) if x["category"] in ("detection", "mart_vs_clean")]}
+                   "carried_scorecard": [x for x in old.get("scorecard", []) if x["rule"] not in {s["rule"] for s in scorecard}]}
         detection, diffs = carried["detection"], carried["mart_vs_clean"]
         scorecard.extend(carried["carried_scorecard"])
     out = {"generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),

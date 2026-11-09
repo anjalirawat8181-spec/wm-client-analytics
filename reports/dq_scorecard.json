@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-09T07:59:10+00:00",
+  "generated_at": "2026-11-09T14:00:47+00:00",
   "overall": {
     "rules": 35,
     "rules_passing": 34,
@@ -570,5 +570,5 @@
     }
   ],
   "detection_note": null,
-  "detection_generated_at": "2026-11-09T07:59:10+00:00"
+  "detection_generated_at": "2026-11-09T14:00:47+00:00"
 }
