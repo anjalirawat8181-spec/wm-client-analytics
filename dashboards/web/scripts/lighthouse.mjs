@@ -1,9 +1,7 @@
-// Runs Lighthouse (desktop and mobile) against each page of the preview server, REPEAT times, and reports the median of each score.
-// Mobile uses Lighthouse's default 4x CPU slowdown and slow-4G throttling. This machine has run-to-run noise, hence the median.
 import lighthouse from "lighthouse";
 import { launch } from "chrome-launcher";
 import { chromium } from "playwright";
-import { existsSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:4173/wm-client-analytics/";
@@ -16,18 +14,23 @@ const chromePath = candidates.find((p) => p && existsSync(p));
 const median = (xs) => [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)];
 const cfgFor = (form) => form === "desktop" ? { extends: "lighthouse:default", settings: { formFactor: "desktop", screenEmulation: { mobile: false, width: 1350, height: 940, deviceScaleFactor: 1, disabled: false }, throttling: { rttMs: 40, throughputKbps: 10240, cpuSlowdownMultiplier: 1 } } } : undefined;
 const results = [];
+function save() {
+  const previous = existsSync(OUT) ? JSON.parse(readFileSync(OUT, "utf8")) : [];
+  const merged = [...previous.filter((p) => !results.some((r) => r.form === p.form && r.page === p.page)), ...results].sort((a, b) => a.form.localeCompare(b.form));
+  writeFileSync(OUT, JSON.stringify(merged, null, 2));
+}
 for (const form of (process.env.FORMS ?? "desktop,mobile").split(",")) {
   for (const [name, hash] of pages) {
     const runs = [];
     const failing = new Set();
     for (let i = 0; i < REPEAT; i++) {
-      // A fresh browser per run, with one retry: headless Edge on Windows occasionally dies between runs.
+
       let r;
       for (let attempt = 0; attempt < 3 && !r; attempt++) {
         const chrome = await launch({ chromePath, chromeFlags: ["--headless=new", "--no-sandbox"] });
         try { r = await lighthouse(BASE + hash, { port: chrome.port, output: "json", onlyCategories: ["performance", "accessibility", "best-practices", "seo"], logLevel: "error" }, cfgFor(form)); }
         catch (e) { console.log("   retry after:", String(e).slice(0, 80)); }
-        try { await chrome.kill(); } catch { /* EBUSY on the temp profile */ }
+        try { await chrome.kill(); } catch {  }
       }
       if (!r) throw new Error("Lighthouse failed 3 times");
       const c = r.lhr.categories;
@@ -39,7 +42,8 @@ for (const form of (process.env.FORMS ?? "desktop,mobile").split(",")) {
       accessibility: median(runs.map((x) => x.accessibility)), bestPractices: median(runs.map((x) => x.bestPractices)), seo: median(runs.map((x) => x.seo)),
       lcpMs: Math.round(median(runs.map((x) => x.lcp))), tbtMs: Math.round(median(runs.map((x) => x.tbt))), failingAudits: [...failing] };
     results.push(row);
+    save();
     console.log(form.padEnd(8), name.padEnd(14), `perf ${row.performance} (${row.performanceAllRuns.join("/")}) a11y ${row.accessibility} bp ${row.bestPractices} seo ${row.seo} lcp ${row.lcpMs}ms tbt ${row.tbtMs}ms`, row.failingAudits.length ? `failing: ${row.failingAudits.join(",")}` : "");
   }
 }
-writeFileSync(OUT, JSON.stringify(results, null, 2));
+

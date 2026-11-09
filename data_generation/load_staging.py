@@ -1,13 +1,3 @@
-"""Load output/staging/*.csv into the staging schema (staging only; never touches mart).
-
-Usage:
-  python data_generation/load_staging.py --dry-run           # counts and size estimate, no connection
-  python data_generation/load_staging.py                     # refuses if any staging table is non-empty
-  python data_generation/load_staging.py --truncate-staging  # asks you to type "TRUNCATE staging" first
-
-All seven tables load in ONE transaction (COPY), so a failure leaves staging as it was.
-DATABASE_URL is read from .env via python-dotenv and is never printed.
-"""
 import argparse
 import json
 import os
@@ -26,9 +16,7 @@ TABLES = ["advisors", "clients", "products", "transactions", "holdings_monthly",
 SIZE_LIMIT_MB = 400.0
 MB = 1024 * 1024
 
-
 class BatchStream:
-    """File-like object: the CSV with a constant _batch_id column appended to every line."""
 
     def __init__(self, path, batch_id):
         self.f = open(path, "r", encoding="utf-8", newline="")
@@ -50,7 +38,6 @@ class BatchStream:
     def close(self):
         self.f.close()
 
-
 def connect_with_retry(url, attempts=3):
     for i in range(1, attempts + 1):
         try:
@@ -61,14 +48,12 @@ def connect_with_retry(url, attempts=3):
                 raise SystemExit("Could not connect to the database. Is the Neon project awake?")
             time.sleep(3 * i)
 
-
 def counts(cur):
     out = {}
     for t in TABLES:
         cur.execute(f"SELECT count(*) FROM staging.{t}")
         out[t] = cur.fetchone()[0]
     return out
-
 
 def main():
     ap = argparse.ArgumentParser()
@@ -160,7 +145,6 @@ def main():
     print(f"Total database size: {cur.fetchone()[0] / MB:.1f} MB")
     conn.close()
     return 1 if bad else 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

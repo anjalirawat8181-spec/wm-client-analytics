@@ -1,7 +1,3 @@
--- View: analytics.v_revenue_by_segment_branch_advisor
--- Business question: Where does fee revenue come from: which segment, branch and advisor?
--- KPI dictionary refs: Revenue per Client (clients active at month-end only).
--- Grain: one row per month-end x segment x branch x advisor.
 CREATE OR REPLACE VIEW analytics.v_revenue_by_segment_branch_advisor AS
 SELECT k.snapshot_date, k.segment, k.branch, k.advisor_id,
        count(*)                                          AS active_clients,

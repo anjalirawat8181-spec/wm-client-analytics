@@ -1,6 +1,3 @@
--- ETL step 3: staging.clients -> mart.dim_client
--- Rule 4: NULL kyc_status is promoted as 'pending' and logged as remediated (null_kyc).
--- Rule 5: any other constraint violation is rejected and logged with the constraint name.
 CREATE TEMP TABLE _cli ON COMMIT DROP AS
 WITH x AS (
     SELECT s.client_id, s.client_name, s.advisor_id, s.segment, s.onboarding_date,

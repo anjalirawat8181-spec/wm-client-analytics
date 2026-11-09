@@ -1,8 +1,3 @@
--- View: analytics.v_attrition_monthly
--- Business question: What share of last month's active clients did we lose this month?
--- KPI dictionary refs: Attrition Rate (churned / opening; opening = active at previous month-end; clients who joined
---   in the month are excluded; NULL when the denominator is 0), Churned client (active before AND (closed OR AUM < 100000 now)).
--- Grain: one row per month-end x segment, plus segment = 'All'. The first snapshot has no previous month, so opening = 0 and the rate is NULL.
 CREATE OR REPLACE VIEW analytics.v_attrition_monthly AS
 SELECT k.snapshot_date,
        coalesce(k.segment, 'All')                                          AS segment,

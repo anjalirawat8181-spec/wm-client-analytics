@@ -1,8 +1,3 @@
--- View: analytics.v_revenue_lost
--- Business question: How much monthly fee revenue walked out the door with the clients we lost?
--- KPI dictionary refs: Revenue per Client edge case: revenue lost for a churned client = their fee revenue at the last month-end
---   before churn, reported in the churn month. Churned client = active at previous month-end AND (closed OR AUM < 100000 now).
--- Grain: one row per month-end x segment, plus segment = 'All', for months with at least one churned client.
 CREATE OR REPLACE VIEW analytics.v_revenue_lost AS
 SELECT k.snapshot_date,
        coalesce(k.segment, 'All')    AS segment,

@@ -1,7 +1,3 @@
--- View: analytics.v_top_clients_at_risk
--- Business question: Who should advisors call first this week?
--- KPI dictionary refs: see v_churn_risk_score. Only client_id is exposed (no names) so the list can be shared safely.
--- Grain: one row per High or Medium risk active client at the latest month-end, ranked by score then AUM.
 CREATE OR REPLACE VIEW analytics.v_top_clients_at_risk AS
 SELECT row_number() OVER (ORDER BY r.risk_score DESC, r.aum DESC, r.client_id) AS priority_rank,
        r.client_id, r.segment, r.branch, r.advisor_id, r.aum, r.days_since_last_contact,

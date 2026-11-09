@@ -1,8 +1,3 @@
--- View: analytics.v_contact_gap_attrition
--- Business question: Do clients we have not spoken to for a while leave more often?
--- KPI dictionary refs: Days Since Last Contact (connected only), Attrition Rate (opening = active at previous month-end).
--- Grain: one row per contact-gap bucket x segment (plus 'All'), pooled over all months. The gap is measured at the
---   PREVIOUS month-end, so it is known before the client leaves.
 CREATE OR REPLACE VIEW analytics.v_contact_gap_attrition AS
 WITH x AS (
     SELECT k.segment, k.was_active, k.is_active,

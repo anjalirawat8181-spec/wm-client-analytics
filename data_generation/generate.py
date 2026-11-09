@@ -1,17 +1,3 @@
-"""Synthetic data generator for wm-client-analytics (all data is fictional).
-
-Usage:  python data_generation/generate.py [--seed N] [--clients N] [--small]
-
-Writes (all git-ignored) under data_generation/output/:
-  clean/<table>.csv     data that passes every mart constraint
-  staging/<table>.csv   clean data plus injected dirty rows (columns = staging tables, minus _loaded_at/_batch_id)
-  truth/*.csv           hidden truth: dirty_manifest, churn_truth, advisor_roles, client_profiles, market_returns
-  run_summary.json      seed, config, row counts, size estimate, SHA256 of every CSV
-
-Money is whole rupees (int64). Month-end holdings follow an exact roll-forward:
-  end_value = round((prev_value + net_flows_into_product_in_month) * (1 + product_return))
-(all flows of a month are treated as happening at the start of the month).
-"""
 import argparse
 import hashlib
 import json
@@ -53,18 +39,14 @@ PRODUCT_DEFS = [
 ]
 FUND_HOUSES = ["Northstar AMC", "Meridian Capital", "Banyan Asset Mgmt", "Lotus Wealth Funds", "Harbor Point AMC"]
 
-
 def log(msg):
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
-
 
 def d64(a):
     return np.asarray(a).astype("datetime64[D]")
 
-
 def dstr(a):
     return d64(a).astype(str)
-
 
 def trunc_lognormal(rng, n, median, sigma, lo, hi):
     out = np.empty(n)
@@ -75,7 +57,6 @@ def trunc_lognormal(rng, n, median, sigma, lo, hi):
         out[todo[ok]] = x[ok]
         todo = todo[~ok]
     return out
-
 
 def cap_weights(w, cap):
     w = w.copy()
@@ -91,9 +72,7 @@ def cap_weights(w, cap):
         w[under] += excess * w[under] / w[under].sum()
     return w
 
-
 def rebalance_vectors(X, Tm, r1, min_switch):
-    """Switch vector s (rows sum to 0) taking pre-return balances X to the target weights Tm after returns r1."""
     inv = Tm / r1
     lam = X.sum(1) / inv.sum(1)
     Y = np.rint(lam[:, None] * inv).astype(np.int64)
@@ -104,7 +83,6 @@ def rebalance_vectors(X, Tm, r1, min_switch):
     d = s.sum(1)
     s[k, np.abs(s).argmax(1)] -= d
     return s
-
 
 def pairs_from_row(s):
     src = sorted([(-int(s[p]), p) for p in np.nonzero(s < 0)[0]], reverse=True)
@@ -124,7 +102,6 @@ def pairs_from_row(s):
         if na[j] == 0:
             j += 1
     return out
-
 
 def main():
     ap = argparse.ArgumentParser()
@@ -756,7 +733,6 @@ def main():
     if total_stg > C.MAX_STAGING_ROWS_WARNING:
         log(f"WARNING: staging rows exceed {C.MAX_STAGING_ROWS_WARNING:,}")
     log(f"done in {time.time() - t0:.0f}s -> {OUT}")
-
 
 if __name__ == "__main__":
     main()

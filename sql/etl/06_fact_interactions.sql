@@ -1,5 +1,3 @@
--- ETL step 6: staging.interactions -> mart.fact_interactions
--- Rule order: 3 orphan client, 5 any other constraint.
 CREATE TEMP TABLE _int ON COMMIT DROP AS
 WITH x AS (
     SELECT s.interaction_id, s.client_id, s.advisor_id, s.interaction_date, s.channel, s.outcome,

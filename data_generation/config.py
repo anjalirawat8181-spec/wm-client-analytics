@@ -1,9 +1,3 @@
-"""Single source of truth for every synthetic-data parameter.
-
-All data is fictional. Money is whole rupees (int64). Change a value here,
-re-run generate.py, and every downstream file is rebuilt deterministically.
-"""
-
 SEED = 42
 
 N_CLIENTS = 5000

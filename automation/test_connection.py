@@ -7,7 +7,6 @@ from sqlalchemy import create_engine, text
 
 ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
 
-
 def main() -> int:
     load_dotenv(ENV_PATH)
     url = os.getenv("DATABASE_URL", "").strip()
@@ -32,7 +31,6 @@ def main() -> int:
     print("Connection successful!")
     print(version)
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

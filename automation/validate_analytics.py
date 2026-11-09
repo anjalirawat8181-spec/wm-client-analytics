@@ -1,9 +1,3 @@
-"""Validate the analytics views against independent pandas calculations on output/clean and the hidden truth files.
-
-Writes docs/analytics_validation.md. Exit code 1 if any strict check fails.
-Thresholds are fixed in THRESHOLDS below and are never relaxed to make a run pass; gaps are reported instead.
-Needs data_generation/output (clean + truth), so it only runs where those files exist (local, not CI).
-"""
 import sys
 from pathlib import Path
 
@@ -11,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from db import ROOT, connect  # noqa: E402
+from db import ROOT, connect
 
 CLEAN = ROOT / "data_generation" / "output" / "clean"
 TRUTH = ROOT / "data_generation" / "output" / "truth"
@@ -22,25 +16,18 @@ THRESHOLDS = {
     "star_in_top10": 4, "poor_in_bottom10": 4,
 }
 ACTIVE_MIN = 100000
-rows = []  # (section, check, expected, got, ok, strict)
-
+rows = []
 
 def rec(section, check, expected, got, ok, strict=True, gap=False):
-    """strict = view vs independent calculation (a failure is a bug, exit 1).
-    gap = recall/precision vs hidden truth (a failure is reported as a GAP: the view is right, the planted signal is not recovered).
-    Neither threshold nor check is relaxed; gaps are listed in docs/analytics_validation.md."""
     kind = "info" if not strict and not gap else ("gap" if gap else "strict")
     rows.append((section, check, str(expected), str(got), bool(ok), kind))
     print(f"[{'PASS' if ok else {'strict': 'FAIL', 'gap': 'GAP', 'info': 'INFO'}[kind]}] {section}: {check}  expected={expected} got={got}")
-
 
 def q(cur, sql):
     cur.execute(sql)
     return pd.DataFrame(cur.fetchall(), columns=[d[0] for d in cur.description])
 
-
 def build_expected():
-    """Independent pandas model of the KPI dictionary, built only from output/clean."""
     cli = pd.read_csv(CLEAN / "clients.csv", keep_default_na=False, na_values=[""])
     prd = pd.read_csv(CLEAN / "products.csv", keep_default_na=False, na_values=[""])
     hold = pd.read_csv(CLEAN / "holdings_monthly.csv")
@@ -81,7 +68,6 @@ def build_expected():
     grid = gs.sort_values(["client_id", "snapshot_date"]).reset_index(drop=True)
     return cli, grid, txn, rev, months
 
-
 def main() -> int:
     if not CLEAN.exists() or not TRUTH.exists():
         print("data_generation/output not found (expected in CI): validation skipped.")
@@ -90,7 +76,6 @@ def main() -> int:
     conn = connect()
     cur = conn.cursor()
 
-    # 1. AUM, all months and segments
     exp = grid.groupby(["snapshot_date", "segment"]).aum.sum().reset_index()
     got = q(cur, "select snapshot_date, segment, aum from analytics.v_monthly_aum_nnm where segment <> 'All'")
     got["snapshot_date"] = pd.to_datetime(got.snapshot_date)
@@ -101,7 +86,6 @@ def main() -> int:
     tot_v = int(q(cur, "select aum from analytics.v_monthly_aum_nnm where segment='All' order by snapshot_date desc limit 1").aum[0])
     rec("AUM", "latest firm AUM (rupees)", tot_e, tot_v, tot_e == tot_v)
 
-    # 2. Net new money (external flows by transaction month)
     txn["me"] = txn.txn_date + pd.offsets.MonthEnd(0)
     txn["flow"] = np.where(txn.flow_type == "external_in", txn.amount, np.where(txn.flow_type == "external_out", -txn.amount, 0))
     e = txn.groupby("me").flow.sum()
@@ -111,7 +95,6 @@ def main() -> int:
     ok = all(abs(e.get(d, 0) - v[d]) < 0.5 for d in v.index)
     rec("NNM", f"firm NNM matches in all {len(v)} months", "equal", "equal" if ok else "differs", ok)
 
-    # 3. Attrition (opening, churned) by month and segment
     ex = grid.groupby(["snapshot_date", "segment"]).agg(opening=("was_active", lambda s: int(s.eq(True).sum())),
                                                        churned=("churned", "sum")).reset_index()
     gv = q(cur, "select snapshot_date, segment, opening_clients, churned_clients from analytics.v_attrition_monthly where segment<>'All'")
@@ -127,7 +110,6 @@ def main() -> int:
     rec("Attrition", "annualised from the pooled monthly rate (informational; generator target about 12%)", "~0.12", f"{ann:.4f}",
         abs(ann - 0.12) < 0.02, strict=False)
 
-    # 4. Concentration and idle flag counts
     fv = q(cur, "select snapshot_date, concentrated_flag, idle_flag from analytics.v_flags")
     fv["snapshot_date"] = pd.to_datetime(fv.snapshot_date)
     rec("Concentration", "flagged client-months (>40%, non-cash, active)", int(grid.conc_flag.sum()), int(fv.concentrated_flag.sum()),
@@ -135,7 +117,6 @@ def main() -> int:
     rec("Idle cash", "flagged client-months (>30% for 2+ months)", int(grid.idle_flag.sum()), int(fv.idle_flag.sum()),
         int(grid.idle_flag.sum()) == int(fv.idle_flag.sum()))
 
-    # 5. Revenue total of active clients and revenue lost
     rev["me"] = rev.month_end
     r = grid.merge(rev, left_on=["client_id", "snapshot_date"], right_on=["client_id", "me"], how="left")
     exp_rev = r[r.active].groupby("snapshot_date").fee_revenue.sum()
@@ -153,14 +134,12 @@ def main() -> int:
     ok = all(abs(lost.get(d, 0) - lv.get(d, 0)) < 0.5 for d in set(lost.index) | set(lv.index))
     rec("Revenue lost", "last pre-churn month revenue matches in all months", "equal", "equal" if ok else "differs", ok)
 
-    # 6. Days since last contact (latest month, active clients)
     last = grid[grid.snapshot_date == months[-1]].set_index("client_id").dslc
     dv = q(cur, f"select client_id, days_since_last_contact d from analytics.v_client_month_kpis where snapshot_date = '{pd.Timestamp(months[-1]).date()}'")
     dv = dv.set_index("client_id").d
     same = int((last.reindex(dv.index) == dv).sum())
     rec("Days since contact", "latest month: clients with identical value", len(dv), same, same == len(dv))
 
-    # 7. Trailing 12-month attrition for the latest month (independent)
     gg = grid.copy()
     gg["act12"] = gg.groupby("client_id").active.shift(12)
     gg["roll"] = gg.groupby("client_id").churned.transform(lambda s: s.astype(int).rolling(12, min_periods=1).max())
@@ -170,7 +149,6 @@ def main() -> int:
     v12 = float(q(cur, "select attrition_trailing_12m a from analytics.v_attrition_trailing12 where segment='All' order by snapshot_date desc limit 1").a[0])
     rec("Trailing 12m attrition", "latest month", f"{e12:.6f}", f"{v12:.6f}", abs(e12 - v12) < 1e-9)
 
-    # 8. Recall / precision against hidden truth
     ct = pd.read_csv(TRUTH / "churn_truth.csv", keep_default_na=False, na_values=[""])
     truth_ids = set(ct[ct.churn_type != "none"].client_id)
     view_ids = set(q(cur, "select distinct client_id from analytics.v_client_month_kpis where was_active and not is_active").client_id)
@@ -214,10 +192,8 @@ def main() -> int:
     rec("Star advisors", "stars inside top 5 by net flow rate (informational)", "5", len(stars & top5), len(stars & top5) == 5, strict=False)
     rec("Poor-contact advisors", "inside bottom 5 (informational)", "5", len(poor & bot5), len(poor & bot5) == 5, strict=False)
 
-    # extra, informational only: the same stars ranked by trailing-12-month NNM as % of AUM (the strict check above is NOT replaced)
     rec("Star advisors", "stars inside top 10 by NNM per client, the measure used before the net flow rate (informational)", "5", len(stars & top10_per_client), False, strict=False)
 
-    # 9. Churn risk score: does it point at next-month churners? (informational, with base-rate lift)
     rs = q(cur, "select client_id, snapshot_date, risk_level from analytics.v_churn_risk_score")
     rs["snapshot_date"] = pd.to_datetime(rs.snapshot_date)
     nxt = grid[["client_id", "snapshot_date", "churned"]].copy()
@@ -253,7 +229,6 @@ def main() -> int:
         L.append(f"- {r[0]}: {r[1]} (expected {r[2]}, got {r[3]})")
     (ROOT / "docs" / "analytics_validation.md").write_text("\n".join(L) + "\n", encoding="utf-8")
     return 1 if fails else 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,9 +1,3 @@
--- View: analytics.v_advisor_ranking_trend
--- Business question: Is an advisor climbing or slipping against peers over time?
--- KPI dictionary refs: AUM, Net New Money (rolling 3 and 12 months); net flow rate = rolling 12-month NNM / AUM 12 month-ends earlier.
--- Grain: one row per advisor x month-end.
--- Techniques: DENSE_RANK per month, SUM OVER 3-row and 12-row frames, LAG of the previous rank and of AUM 12 months back.
---   net_flow_rate and its rank exist from the 13th month-end onward.
 CREATE OR REPLACE VIEW analytics.v_advisor_ranking_trend AS
 WITH m AS (
     SELECT k.advisor_id, k.snapshot_date,

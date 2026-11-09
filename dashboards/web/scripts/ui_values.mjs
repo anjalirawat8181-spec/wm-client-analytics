@@ -1,5 +1,3 @@
-// Dumps the visible text of each page (default filters) as JSON, so numbers shown in the UI can be compared with SQL.
-// Usage: BASE_URL=... node scripts/ui_values.mjs > ui_values.json
 import { chromium } from "playwright";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:4173/wm-client-analytics/";

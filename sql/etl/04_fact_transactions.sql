@@ -1,5 +1,3 @@
--- ETL step 4: staging.transactions -> mart.fact_transactions
--- Rule order: 1 duplicate txn_id (keep one), 2 amount <= 0, 3 orphan client, 5 any other constraint.
 CREATE TEMP TABLE _txn ON COMMIT DROP AS
 WITH x AS (
     SELECT s.txn_id, s.client_id, s.product_id, s.txn_date, s.txn_type, s.flow_type, s.amount,

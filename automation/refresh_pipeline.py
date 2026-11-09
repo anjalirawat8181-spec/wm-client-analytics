@@ -1,9 +1,3 @@
-"""Refresh everything downstream of the mart: views, data quality report, validation, dashboard data and the Excel report.
-
-Usage: python automation/refresh_pipeline.py
-Runs the steps in order, logs each to reports/run_log.jsonl, stops with a non-zero exit code on the first failure.
-It never reloads or modifies mart facts: the only writes are the analytics views (dropped and recreated) and local files.
-"""
 import json
 import subprocess
 import sys
@@ -12,7 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from db import ROOT, connect  # noqa: E402
+from db import ROOT, connect
 
 AUTOMATION = ROOT / "automation"
 LOG = ROOT / "reports" / "run_log.jsonl"
@@ -24,18 +18,16 @@ STEPS = [
     ("build_weekly_report", "build_weekly_report.py"),
 ]
 
-
 def log(entry):
     LOG.parent.mkdir(exist_ok=True)
     entry["at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
     with LOG.open("a", encoding="utf-8") as f:
         f.write(json.dumps(entry) + "\n")
 
-
 def main() -> int:
     t_all = time.time()
     t0 = time.time()
-    conn = connect(retries=3, wait=10)  # Neon free projects auto-suspend; this wakes the database and retries
+    conn = connect(retries=3, wait=10)
     cur = conn.cursor()
     cur.execute("select count(*) from mart.dim_client")
     clients = cur.fetchone()[0]
@@ -64,7 +56,6 @@ def main() -> int:
     log({"step": "pipeline", "status": "ok", "seconds": total})
     print(f"pipeline finished in {total}s")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

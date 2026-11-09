@@ -1,7 +1,3 @@
-"""Check that output/clean/*.csv satisfies every mart rule (pure pandas, no database).
-
-Usage: python data_generation/check_clean_data.py   (exit code 0 = all passed)
-"""
 import sys
 from pathlib import Path
 
@@ -16,16 +12,13 @@ CLEAN = HERE / "output" / "clean"
 TRUTH = HERE / "output" / "truth"
 results = []
 
-
 def check(name, ok, detail=""):
     ok = bool(ok)
     results.append((name, ok))
     print(f"[{'PASS' if ok else 'FAIL'}] {name}" + (f"  ({detail})" if detail and not ok else ""))
 
-
 def load(name):
     return pd.read_csv(CLEAN / f"{name}.csv")
-
 
 def main():
     if not CLEAN.exists():
@@ -166,7 +159,6 @@ def main():
     failed = [n for n, ok in results if not ok]
     print(f"\n{len(results) - len(failed)}/{len(results)} checks passed")
     return 1 if failed else 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

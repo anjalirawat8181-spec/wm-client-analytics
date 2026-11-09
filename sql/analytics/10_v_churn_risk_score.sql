@@ -1,14 +1,3 @@
--- View: analytics.v_churn_risk_score
--- Business question: Which active clients are most likely to leave next, and why?
--- KPI dictionary refs: Active client, Days Since Last Contact thresholds, Idle Cash flag, AUM-drop flag (see v_flags).
--- Grain: one row per ACTIVE client x month-end.
--- Transparent rules (points add up; no model, no hidden weights):
---   AUM down > 50% over 3 month-ends ........ +3
---   AUM down 30% to 50% over 3 month-ends ... +1
---   no connected contact for 180+ days ...... +2   (critical)
---   no connected contact for 90 to 179 days . +1   (at risk)
---   idle cash flag .......................... +1
--- Level: High = 3 or more points, Medium = 1 or 2 points, Low = 0 points.
 CREATE OR REPLACE VIEW analytics.v_churn_risk_score AS
 SELECT f.client_id, f.snapshot_date, f.segment, f.branch, f.advisor_id, f.aum, f.days_since_last_contact,
        s.risk_score,

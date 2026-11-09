@@ -1,4 +1,3 @@
--- ETL step 2: staging.products -> mart.dim_product
 CREATE TEMP TABLE _prod ON COMMIT DROP AS
 WITH x AS (
     SELECT s.product_id, s.product_name, s.asset_class, s.fund_house, s.fee_pct,

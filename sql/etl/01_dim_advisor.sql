@@ -1,5 +1,3 @@
--- ETL step 1: staging.advisors -> mart.dim_advisor
--- Rules: NOT NULL, duplicate key (dim_advisor_pkey); every rejection is logged to mart.dq_exceptions.
 CREATE TEMP TABLE _adv ON COMMIT DROP AS
 WITH x AS (
     SELECT s.advisor_id, s.advisor_name, s.branch, s.team, s.join_date,

@@ -1,19 +1,10 @@
-"""Staging -> mart ETL. Runs sql/etl/*.sql in order inside ONE transaction.
-
-Usage:
-    python automation/run_etl.py --dry-run                         # do the work, print counts, roll back
-    python automation/run_etl.py --confirm-rebuild "REBUILD mart"  # truncate mart (except dim_date), reload, commit
-
-Every rejected or remediated row is written to mart.dq_exceptions. Without the confirm flag the
-script refuses to touch a mart that already holds data, so a plain re-run cannot double-load.
-"""
 import argparse
 import sys
 import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from db import ROOT, connect, db_size_mb  # noqa: E402
+from db import ROOT, connect, db_size_mb
 
 ETL_DIR = ROOT / "sql" / "etl"
 DIM_DATE_SQL = ROOT / "sql" / "schema" / "04_populate_dim_date.sql"
@@ -22,14 +13,12 @@ CONFIRM = "REBUILD mart"
 MART_TABLES = ["dim_advisor", "dim_product", "dim_client", "fact_holdings_monthly",
                "fact_transactions", "fact_interactions", "fact_revenue", "dq_exceptions"]
 
-
 def counts(cur, schema, tables):
     out = {}
     for t in tables:
         cur.execute(f"select count(*) from {schema}.{t}")
         out[t] = cur.fetchone()[0]
     return out
-
 
 def main() -> int:
     ap = argparse.ArgumentParser()
@@ -49,7 +38,7 @@ def main() -> int:
         cur.execute("select coalesce(sum(pg_total_relation_size(c.oid)),0)/1024.0/1024 from pg_class c "
                     "join pg_namespace n on n.oid=c.relnamespace where n.nspname='staging' and c.relkind='r'")
         staging_mb = float(cur.fetchone()[0])
-        projected = size + staging_mb  # upper bound: mart rows are smaller than staging rows
+        projected = size + staging_mb
         print(f"Database size: {size:.1f} MB; staging {staging_mb:.1f} MB; projected after load <= {projected:.1f} MB (limit {LIMIT_MB:.0f})")
         if projected > LIMIT_MB:
             print("STOP: projected size exceeds the limit.")
@@ -59,7 +48,6 @@ def main() -> int:
                                       "holdings_monthly", "interactions", "revenue"])
         print("Staging rows:", stg)
 
-        # dim_date is calendar reference data; the file is idempotent.
         cur.execute(DIM_DATE_SQL.read_text(encoding="utf-8"))
         cur.execute("select count(*) from mart.dim_date")
         print("dim_date rows:", cur.fetchone()[0])
@@ -102,7 +90,6 @@ def main() -> int:
         return 1
     finally:
         conn.close()
-
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,11 +1,3 @@
-"""Apply sql/schema/*.sql to the Neon database, in filename order.
-
-Usage:
-    python automation/apply_schema.py            # apply; aborts if staging/mart tables exist
-    python automation/apply_schema.py --reset    # DROP SCHEMA staging, mart CASCADE first
-
-Each run is one transaction: all files apply, or none do.
-"""
 import os
 import sys
 from pathlib import Path
@@ -15,7 +7,6 @@ from sqlalchemy import create_engine, text
 
 ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_DIR = ROOT / "sql" / "schema"
-
 
 def main() -> int:
     load_dotenv(ROOT / ".env")
@@ -54,7 +45,6 @@ def main() -> int:
 
     print("Schema applied.")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,7 +1,3 @@
--- View: analytics.v_monthly_aum_nnm
--- Business question: How are assets under management and net new money trending, in total and by segment?
--- KPI dictionary refs: AUM, Net New Money, Active client.
--- Grain: one row per month-end x segment, plus segment = 'All' for the firm total.
 CREATE OR REPLACE VIEW analytics.v_monthly_aum_nnm AS
 SELECT k.snapshot_date,
        coalesce(k.segment, 'All')                       AS segment,

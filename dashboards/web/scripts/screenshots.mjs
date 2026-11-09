@@ -1,5 +1,3 @@
-// Screenshots all 5 pages in dark, light and a 390px mobile viewport, and fails on console errors or horizontal overflow.
-// Usage: BASE_URL=http://localhost:4173/wm-client-analytics/ OUT=../../docs/screenshots node scripts/screenshots.mjs
 import { chromium } from "playwright";
 import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
@@ -38,14 +36,14 @@ for (const mode of MODES) {
     errors.length = 0;
     await page.goto(BASE + hash, { waitUntil: "networkidle" });
     await page.waitForSelector("main h1", { timeout: 20000 });
-    // Charts mount lazily as they scroll into view, so show the whole page first, then wait for the charts.
+
     const full = await page.evaluate(() => document.documentElement.scrollHeight);
     await page.setViewportSize({ width: mode.viewport.width, height: Math.min(full, 6000) });
     if (["executive", "client-health"].includes(name)) await page.waitForSelector("svg[role=img]", { timeout: 20000 });
-    await page.waitForTimeout(3000); // let mount animations finish
+    await page.waitForTimeout(3000);
     const charts = await page.locator("svg[role=img]").count();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-    // A fullPage screenshot resizes the viewport, which restarts chart mount animations mid-capture. Resize first, wait, then capture.
+
     await page.screenshot({ path: `${OUT}/${PREFIX}${name}-${mode.name}.png` });
     await page.setViewportSize(mode.viewport);
     const bad = errors.length > 0 || overflow > 1;

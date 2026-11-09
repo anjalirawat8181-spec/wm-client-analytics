@@ -1,7 +1,3 @@
--- View: analytics.v_asset_allocation_mix
--- Business question: How is client money split across asset classes, and does the mix differ by segment?
--- KPI dictionary refs: AUM (all products including cash), asset_class from dim_product.
--- Grain: one row per month-end x segment (plus 'All') x asset class, with the share of that segment's AUM.
 CREATE OR REPLACE VIEW analytics.v_asset_allocation_mix AS
 WITH agg AS (
     SELECT h.snapshot_date, coalesce(c.segment, 'All') AS segment, p.asset_class, sum(h.market_value) AS value

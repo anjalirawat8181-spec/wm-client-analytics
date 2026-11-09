@@ -1,12 +1,3 @@
-"""Verify the staging and mart schemas.
-
-Structural checks (tables, columns, keys, no stray indexes) plus behavioural
-checks: valid rows are accepted and every dirty-data pattern is rejected by
-the mart. All test rows are written inside one transaction that is rolled
-back, so the database is left unchanged.
-
-Usage: python automation/verify_schema.py   (exit code 0 = all passed)
-"""
 import os
 import sys
 from pathlib import Path
@@ -42,11 +33,9 @@ STAGING = {
 ALLOWED_INDEXES = {"idx_holdings_snapshot_date"}
 results = []
 
-
 def check(name, ok, detail=""):
     results.append(ok)
     print(f"[{'PASS' if ok else 'FAIL'}] {name}" + (f"  ({detail})" if detail and not ok else ""))
-
 
 def cols(conn, schema, table):
     rows = conn.execute(text(
@@ -55,9 +44,7 @@ def cols(conn, schema, table):
         {"s": schema, "t": table}).fetchall()
     return [r[0] for r in rows]
 
-
 def rejects(conn, sql, expect_sqlstate="23"):
-    """True if the statement fails with an integrity error (SQLSTATE class 23)."""
     conn.exec_driver_sql("SAVEPOINT t")
     try:
         conn.exec_driver_sql(sql)
@@ -66,7 +53,6 @@ def rejects(conn, sql, expect_sqlstate="23"):
         return str(getattr(getattr(exc, "orig", None), "pgcode", "")).startswith(expect_sqlstate)
     conn.exec_driver_sql("ROLLBACK TO SAVEPOINT t")
     return False
-
 
 def accepts(conn, sql):
     conn.exec_driver_sql("SAVEPOINT t")
@@ -77,7 +63,6 @@ def accepts(conn, sql):
     except Exception:
         conn.exec_driver_sql("ROLLBACK TO SAVEPOINT t")
         return False
-
 
 def structural(conn):
     for t, expected in MART.items():
@@ -96,14 +81,11 @@ def structural(conn):
         "WHERE table_schema = 'staging' AND is_nullable = 'NO'")).scalar()
     check("staging has no NOT NULL columns", n == 0, f"{n} found")
 
-
     bad = conn.execute(text(
         "SELECT i.indexname FROM pg_indexes i "
         "WHERE i.schemaname IN ('staging', 'mart') AND NOT EXISTS ("
         "  SELECT 1 FROM pg_constraint c JOIN pg_class ic ON ic.oid = c.conindid "
         "  WHERE ic.relname = i.indexname AND c.contype IN ('p', 'u'))")).fetchall()
-    # idx_holdings_snapshot_date is the one deliberate performance index (sql/schema/05_performance_indexes.sql,
-    # justified in docs/query_optimization.md). Any other secondary index is still a failure.
     bad = [b for b in bad if b[0] not in ALLOWED_INDEXES]
     check("no secondary indexes beyond PK/UNIQUE and the documented performance index", not bad, str([b[0] for b in bad]))
 
@@ -124,10 +106,7 @@ def structural(conn):
         "WHERE n.nspname = 'mart' AND c.contype = 'f'")).scalar()
     check("mart foreign key count is 12", fk == 12, f"{fk} found")
 
-
 def behavioural(conn):
-    # The behavioural tests insert fixed IDs (client 1, advisor 1, txn 1 ...). Once the ETL has loaded real data those IDs
-    # collide, so these tests only make sense on an empty database. They are skipped, not weakened, when data is present.
     loaded = conn.execute(text("SELECT (SELECT count(*) FROM mart.dim_client) + (SELECT count(*) FROM staging.clients)")).scalar()
     if loaded:
         print("SKIPPED behavioural checks: database already holds data (they need empty staging and mart tables).")
@@ -212,7 +191,6 @@ def behavioural(conn):
           "INSERT INTO mart.dq_exceptions (exception_id, source_table, rule_name) VALUES (1, 'x', 'y')",
           expect_sqlstate="428"))
 
-
     dirty = [
         "INSERT INTO staging.transactions (txn_id, client_id, amount) VALUES (1, 999, -500)",
         "INSERT INTO staging.transactions (txn_id, client_id, amount) VALUES (1, 999, -500)",
@@ -222,7 +200,6 @@ def behavioural(conn):
     check("staging accepts duplicate/orphan/negative/null rows", all(accepts(conn, s) for s in dirty))
     n = conn.execute(text("SELECT count(*) FROM staging.transactions WHERE _loaded_at IS NOT NULL")).scalar()
     check("staging _loaded_at defaults to now()", n == 2, f"{n}")
-
 
 def main() -> int:
     load_dotenv(ROOT / ".env")
@@ -243,7 +220,6 @@ def main() -> int:
     failed = results.count(False)
     print(f"\n{len(results) - failed}/{len(results)} checks passed.")
     return 1 if failed else 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,6 +1,3 @@
--- Populate mart.dim_date with one row per calendar day, 2024-01-01 to 2027-12-31 (1461 days).
--- Idempotent: safe to run more than once. The data window is 2025-01 to 2026-10;
--- 2024 is included because interaction history starts in Jul 2024.
 INSERT INTO mart.dim_date (date_key, full_date, year, quarter, month, month_name,
                            month_start, month_end, is_month_end)
 SELECT to_char(d, 'YYYYMMDD')::integer,

@@ -1,9 +1,3 @@
-"""Export dashboard JSON (and Tableau CSVs) from the analytics views.
-
-Usage: python automation/export_dashboard_data.py
-Writes dashboards/web/public/data/*.json and dashboards/tableau_extracts/*.csv. Read-only against the database.
-The web app is static: it only ever reads these files. Client names are never exported, only client_id.
-"""
 import json
 import os
 import subprocess
@@ -15,18 +9,16 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from db import ROOT, connect  # noqa: E402
+from db import ROOT, connect
 
 OUT = ROOT / "dashboards" / "web" / "public" / "data"
 TABLEAU = ROOT / "dashboards" / "tableau_extracts"
 MAX_BYTES = 2 * 1024 * 1024
 TOP_AT_RISK = 50
 
-
 def q(cur, sql):
     cur.execute(sql)
     return pd.DataFrame(cur.fetchall(), columns=[d[0] for d in cur.description])
-
 
 def clean(v):
     if isinstance(v, Decimal):
@@ -40,10 +32,8 @@ def clean(v):
         return clean(v.item())
     return v
 
-
 def records(df):
     return [{k: clean(v) for k, v in row.items()} for row in df.to_dict("records")]
-
 
 def write(name, payload, must_have_rows=True):
     if must_have_rows:
@@ -57,7 +47,6 @@ def write(name, payload, must_have_rows=True):
     (OUT / name).write_text(text, encoding="utf-8")
     print(f"  {name:28s} {len(text) / 1024:8.1f} KB")
 
-
 def git_sha():
     sha = os.getenv("GITHUB_SHA")
     if sha:
@@ -66,7 +55,6 @@ def git_sha():
         return subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, text=True).strip()
     except Exception:
         return "unknown"
-
 
 def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
@@ -174,7 +162,6 @@ def main() -> int:
         df.to_csv(TABLEAU / f"{name}.csv", index=False)
     print(f"Export OK: {len(list(OUT.glob('*.json')))} JSON files, as of {summary['as_of']}")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

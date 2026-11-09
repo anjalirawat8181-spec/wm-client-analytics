@@ -12,6 +12,6 @@ export function safeSet(key: string, value: string): void {
   try {
     localStorage.setItem(key, value);
   } catch {
-    /* storage unavailable (private mode or blocked): the page still works without it */
+    return;
   }
 }

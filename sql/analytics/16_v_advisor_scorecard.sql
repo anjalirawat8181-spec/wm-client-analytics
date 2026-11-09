@@ -1,12 +1,3 @@
--- View: analytics.v_advisor_scorecard
--- Business question: Which advisors grow their book fastest relative to the assets they look after, and which keep in touch with their clients?
--- KPI dictionary refs: AUM, Net New Money, Active client, Days Since Last Contact (only connected interactions count).
--- Grain: one row per advisor, measured at the latest month-end with trailing-12-month flows and contacts.
--- Measures: net_flow_rate = trailing-12-month NNM of the advisor's clients / AUM of those clients at the opening month-end
---   (organic growth rate, comparable between a large and a small book); nnm_per_client = the same NNM / average active clients;
---   contacts_per_client_month = connected interactions in the 12 months / active client-months.
--- Ranks: DENSE_RANK (1 = best). growth_rank and growth_decile follow net_flow_rate (decile 1 = highest 10%);
---   contact_decile 1 = lowest 10% contact (NTILE).
 CREATE OR REPLACE VIEW analytics.v_advisor_scorecard AS
 WITH lastm AS (
     SELECT max(snapshot_date) AS d, max(month_index) AS idx FROM analytics.v_snapshot_months

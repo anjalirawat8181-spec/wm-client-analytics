@@ -1,10 +1,3 @@
--- View: analytics.v_cohort_retention
--- Business question: Of the clients who joined in a given month, how many are still active 1, 2, ... 12 months later?
--- KPI dictionary refs: Active client (open AND AUM >= 100000). Cohort = onboarding month, only for clients who onboarded
---   after the first snapshot (earlier clients have no observable start). Clients onboarded in the first snapshot month are
---   excluded: the generator creates no holdings or transactions in that month, so they are never active (see docs/data_generation_notes.md).
--- Grain: one row per cohort month x months since onboarding (0 to 12), only where that later month-end exists in the data.
--- Techniques: FIRST_VALUE window over the cohort to carry the cohort size.
 CREATE OR REPLACE VIEW analytics.v_cohort_retention AS
 WITH cohort AS (
     SELECT c.client_id,

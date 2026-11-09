@@ -1,7 +1,3 @@
--- View: analytics.v_data_quality_summary
--- Business question: How much dirty data did the pipeline find, and what happened to it?
--- KPI dictionary refs: Global definitions > Clean data only (no duplicates, no negative amounts, no orphaned client IDs).
--- Grain: one row per source table x rule, with the number of rows affected, how it was handled and the staging row count.
 CREATE OR REPLACE VIEW analytics.v_data_quality_summary AS
 WITH stg AS (
     SELECT 'advisors' AS source_table, count(*) AS staging_rows FROM staging.advisors

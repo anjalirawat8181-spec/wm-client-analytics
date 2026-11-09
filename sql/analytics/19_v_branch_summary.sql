@@ -1,7 +1,3 @@
--- View: analytics.v_branch_summary
--- Business question: How does each branch compare on assets, flows, revenue and client loss?
--- KPI dictionary refs: AUM, Net New Money, Attrition Rate, Revenue per Client.
--- Grain: one row per month-end x branch.
 CREATE OR REPLACE VIEW analytics.v_branch_summary AS
 SELECT k.snapshot_date, k.branch,
        sum(k.aum)                                                        AS aum,

@@ -1,8 +1,6 @@
-// Indian number formatting. Money is stored in whole rupees; the dashboard reports lakh and crore.
 export const LAKH = 100_000;
 export const CRORE = 10_000_000;
 
-/** 1234567 -> "12,34,567" (Indian digit grouping). */
 export function groupIndian(n: number): string {
   const neg = n < 0;
   const s = Math.abs(Math.round(n)).toString();
@@ -22,7 +20,6 @@ function groupedFixed(v: number, digits: number): string {
   return frac ? `${g}.${frac}` : g;
 }
 
-/** Rupees -> "Rs 5,640.69 crore" / "Rs 2.50 lakh" / "Rs 99,999". Null -> "n/a". */
 export function formatRupees(v: number | null | undefined, digits = 2): string {
   if (v === null || v === undefined || Number.isNaN(v)) return "n/a";
   const sign = v < 0 ? "-" : "";
@@ -32,7 +29,6 @@ export function formatRupees(v: number | null | undefined, digits = 2): string {
   return `${sign}Rs ${groupIndian(a)}`;
 }
 
-/** Short form for chart axes: "5,641 Cr", "2.5 L". */
 export function formatRupeesShort(v: number): string {
   const sign = v < 0 ? "-" : "";
   const a = Math.abs(v);
@@ -45,12 +41,10 @@ export function formatInt(v: number | null | undefined): string {
   return v === null || v === undefined || Number.isNaN(v) ? "n/a" : groupIndian(v);
 }
 
-/** Fraction -> percentage text, e.g. 0.0104 -> "1.04%". */
 export function formatPct(v: number | null | undefined, digits = 2): string {
   return v === null || v === undefined || Number.isNaN(v) ? "n/a" : `${(v * 100).toFixed(digits)}%`;
 }
 
-/** "2026-10-31" -> "Oct 2026". Parsed by hand so the result never depends on the viewer's timezone. */
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 export function formatMonth(iso: string): string {
   const [y, m] = iso.split("-");

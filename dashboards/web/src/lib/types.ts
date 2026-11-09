@@ -35,8 +35,8 @@ export interface MonthAgg {
 
 export interface Filters {
   segment: "All" | Segment;
-  branch: string; // "All" or a branch name
-  from: string; // month-end ISO date
+  branch: string;
+  from: string;
   to: string;
 }
 

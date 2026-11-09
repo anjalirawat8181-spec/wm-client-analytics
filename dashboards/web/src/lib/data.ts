@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 
 const cache = new Map<string, Promise<unknown>>();
 
-/** Fetch a JSON file generated at build time. One request per file, shared between pages. */
 export function loadJson<T>(name: string): Promise<T> {
   let p = cache.get(name);
   if (!p) {
@@ -10,7 +9,7 @@ export function loadJson<T>(name: string): Promise<T> {
       if (!r.ok) throw new Error(`Could not load ${name}.json (${r.status})`);
       return r.json();
     });
-    p.catch(() => cache.delete(name)); // allow a retry after a failure
+    p.catch(() => cache.delete(name));
     cache.set(name, p);
   }
   return p as Promise<T>;

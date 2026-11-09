@@ -1,5 +1,3 @@
--- ETL step 7: staging.revenue -> mart.fact_revenue
--- Rule 5 only (the dirty-data plan has no revenue defects): an unknown client violates fact_revenue_client_id_fkey.
 CREATE TEMP TABLE _rev ON COMMIT DROP AS
 WITH x AS (
     SELECT s.client_id, s.month_end, s.fee_revenue,

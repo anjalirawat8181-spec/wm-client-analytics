@@ -1,10 +1,3 @@
-"""Data quality proof: reconciliation, planted-vs-detected, mart-vs-clean diff and business-rule checks.
-
-Writes docs/dq_scorecard.md and reports/dq_scorecard.json. Exit code 1 if any strict rule fails.
-Read-only against the database. The truth/clean CSVs are used only when present (local runs);
-in CI they are absent, so the script falls back to the checks that need only the database and
-keeps the last planted-vs-caught numbers out of the report rather than inventing them.
-"""
 import json
 import sys
 from collections import Counter
@@ -15,13 +8,12 @@ import pandas as pd
 from psycopg2.extras import execute_values
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from db import ROOT, connect  # noqa: E402
+from db import ROOT, connect
 
 CLEAN = ROOT / "data_generation" / "output" / "clean"
 TRUTH = ROOT / "data_generation" / "output" / "truth"
 RULES_DIR = ROOT / "sql" / "data_quality"
 
-# staging table -> (mart table, key columns used to compare with clean CSV)
 TABLES = {
     "advisors": ("dim_advisor", ["advisor_id"]),
     "clients": ("dim_client", ["client_id"]),
@@ -39,28 +31,24 @@ DEFECT_TO_RULE = {
 REMEDIATED = {"null_kyc"}
 INFORMATIONAL = {"roll_forward_exact"}
 
-
 def fetch_df(cur, sql):
     cur.execute(sql)
     return pd.DataFrame(cur.fetchall(), columns=[d[0] for d in cur.description])
-
 
 def parse_checks():
     manifest = json.loads((RULES_DIR / "checks.json").read_text(encoding="utf-8"))
     return [(m["name"], m["description"], (RULES_DIR / m["file"]).read_text(encoding="utf-8").strip()) for m in manifest]
 
-
 def main() -> int:
     conn = connect()
     cur = conn.cursor()
-    scorecard = []  # dicts: rule, category, checked, failures, pass_pct, planted, caught, note
+    scorecard = []
 
     def add(rule, category, checked, failures, planted=None, caught=None, note="", strict=True):
         pct = 100.0 if checked == 0 else round(100.0 * (checked - failures) / checked, 4)
         scorecard.append({"rule": rule, "category": category, "checked": int(checked), "failures": int(failures),
                           "pass_pct": pct, "planted": planted, "caught": caught, "note": note, "strict": strict})
 
-    # 1. reconciliation: every staging row is promoted, logged as rejected, or a duplicate
     cur.execute("select source_table, rule_name, count(*) from mart.dq_exceptions group by 1,2")
     exc = Counter()
     exc_by_rule = {}
@@ -78,7 +66,6 @@ def main() -> int:
         recon.append({"table": st, "staging": s, "mart": m, "rejected_or_duplicate": exc[st], "unaccounted": diff})
         add(f"reconcile_{st}", "reconciliation", s, abs(diff), note=f"staging {s:,} = mart {m:,} + logged {exc[st]:,}")
 
-    # 2. planted vs detected (answer key); only when the truth files exist locally
     detection = []
     mf = TRUTH / "dirty_manifest.csv"
     if mf.exists():
@@ -98,7 +85,6 @@ def main() -> int:
             add(f"detect_{table}_{rule}", "detection", sum(p.values()) + fp, missed + fp,
                 planted=int(sum(p.values())), caught=int(caught),
                 note=f"missed {missed}, false positives {fp}")
-        # exceptions of a type the manifest does not contain at all
         planted_rules = {(t, r) for t, r in zip(man.table, man.rule)}
         extra = {k: v for k, v in exc_by_rule.items() if k not in planted_rules}
         if extra:
@@ -108,14 +94,13 @@ def main() -> int:
                 note=str(extra))
         _ = planted_c
 
-    # 3. mart vs clean CSV diff
     diffs = []
     if CLEAN.exists():
         kyc_keys = set()
         if mf.exists():
             kyc_keys = set(man[man.rule == "null_kyc"].key_value.astype(int))
         for st, (mt, keys) in TABLES.items():
-            clean = pd.read_csv(CLEAN / f"{st}.csv", keep_default_na=False, na_values=[""])  # "NA" is real text
+            clean = pd.read_csv(CLEAN / f"{st}.csv", keep_default_na=False, na_values=[""])
             mart = fetch_df(cur, f"select * from mart.{mt}")
             for df in (clean, mart):
                 for c in df.columns:
@@ -148,7 +133,6 @@ def main() -> int:
             add(f"mart_equals_clean_{st}", "mart_vs_clean", len(clean), 0 if not unexpected else max(1, n_diff),
                 note=("only kyc_status differs on null_kyc rows" if st == "clients" and n_diff else "identical"))
 
-    # 4. SQL business rules
     if (TRUTH / "market_returns.csv").exists():
         mr = pd.read_csv(TRUTH / "market_returns.csv")
         cur.execute("create temp table _mr (product_id int, month_end date, ret numeric)")
@@ -168,8 +152,6 @@ def main() -> int:
     conn.close()
 
     strict_fail = [s for s in scorecard if s["strict"] and s["failures"] > 0]
-    # Without the hidden truth files (CI) the planted-vs-caught comparison cannot be recomputed. The last local result is carried
-    # forward, labelled with when it was produced, instead of being dropped or invented.
     prior_path = ROOT / "reports" / "dq_scorecard.json"
     carried = {}
     if not detection and prior_path.exists():
@@ -225,7 +207,6 @@ def main() -> int:
               f"checked={s['checked']:>9,} failures={s['failures']:>7,}")
     print(f"Strict failures: {len(strict_fail)}")
     return 1 if strict_fail else 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

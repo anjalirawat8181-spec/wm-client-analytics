@@ -1,10 +1,3 @@
-"""Validate that the planted patterns are present in the generated data.
-
-Reads output/clean/*.csv, output/staging/*.csv and output/truth/*; writes docs/pattern_validation.md.
-Uses the KPI dictionary definitions: active = open AND AUM >= 100000 at month-end;
-churned = active at the previous month-end AND (closed in the month OR AUM < 100000 at this month-end).
-Exit code 1 if any metric FAILS. Thresholds are fixed; the validator never alters data.
-"""
 import sys
 from pathlib import Path
 
@@ -17,14 +10,11 @@ DOC = HERE.parent / "docs" / "pattern_validation.md"
 THRESH = 100_000
 rows = []
 
-
 def add(metric, measured, target, ok, meaning, fix=""):
     rows.append((metric, measured, target, bool(ok), meaning, fix))
 
-
 def rd(sub, name):
     return pd.read_csv(OUT / sub / f"{name}.csv")
-
 
 def main():
     cli, hold, prd = rd("clean", "clients"), rd("clean", "holdings_monthly"), rd("clean", "products")
@@ -215,7 +205,6 @@ def main():
         print(f"[{'PASS' if ok else 'FAIL'}] {m_}: {v}  (target {tg})" + (f"  -> change {fix}" if not ok else ""))
     print(f"\nWrote {DOC}")
     return 1 if fails else 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

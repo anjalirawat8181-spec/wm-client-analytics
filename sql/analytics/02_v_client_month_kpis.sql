@@ -1,11 +1,3 @@
--- View: analytics.v_client_month_kpis
--- Business question: For every client at every month-end, what is the AUM, cash share, concentration,
---   contact gap and activity status that all other KPIs are built from?
--- KPI dictionary refs: AUM (closed clients are 0 from the closure month-end), Idle Cash %, Concentration %
---   (largest NON-cash product / AUM, AUM includes cash), Days Since Last Contact (connected only; falls back to
---   onboarding date), Active client (open AND AUM >= 100000), Segment (fixed at onboarding).
--- Grain: one row per client x month-end, from the client's onboarding month-end to the last snapshot.
--- Techniques: CTEs, LAG (previous status, AUM 1 and 3 months ago), SUM OVER (segment AUM), RANK (AUM rank in segment).
 CREATE OR REPLACE VIEW analytics.v_client_month_kpis AS
 WITH grid AS (
     SELECT c.client_id, c.advisor_id, c.segment, c.onboarding_date, c.closed_date, m.snapshot_date

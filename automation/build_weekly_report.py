@@ -1,8 +1,3 @@
-"""Build the weekly Excel report and email draft from the dashboard JSON (the same numbers the site shows).
-
-Usage: python automation/build_weekly_report.py
-Writes reports/weekly_metrics_report.xlsx and reports/weekly_email_draft.md. No database access: run export_dashboard_data.py first.
-"""
 import json
 import sys
 from datetime import datetime, timezone
@@ -22,10 +17,8 @@ HEAD_FILL = PatternFill("solid", fgColor="121A30")
 HEAD_FONT = Font(bold=True, color="E6C878")
 TITLE = Font(bold=True, size=14)
 
-
 def load(name):
     return json.loads((DATA / f"{name}.json").read_text(encoding="utf-8"))
-
 
 def header(ws, row, labels):
     for i, lab in enumerate(labels, 1):
@@ -34,11 +27,9 @@ def header(ws, row, labels):
         c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
     ws.row_dimensions[row].height = 32
 
-
 def widths(ws, ws_widths):
     for i, w in enumerate(ws_widths, 1):
         ws.column_dimensions[get_column_letter(i)].width = w
-
 
 def main() -> int:
     summary, meta = load("summary"), load("meta")
@@ -46,7 +37,6 @@ def main() -> int:
     risk, top, dq = load("risk_distribution"), load("top_at_risk"), load("dq_scorecard")
     wb = Workbook()
 
-    # Summary
     ws = wb.active
     ws.title = "Summary"
     ws["A1"], ws["A1"].font = "Weekly client analytics report", TITLE
@@ -76,7 +66,6 @@ def main() -> int:
     widths(ws, [32, 16, 16, 14, 12, 12])
     ws.freeze_panes = "A5"
 
-    # AUM and NNM (feeds the native chart on the Summary sheet)
     w2 = wb.create_sheet("AUM and NNM")
     header(w2, 1, ["Month-end", "AUM (Rs crore)", "Net new money (Rs crore)", "Inflows (Rs crore)", "Outflows (Rs crore)", "Active clients", "Fee revenue (Rs crore)", "Revenue per client (Rs)"])
     for i, m in enumerate(overview, 2):
@@ -99,7 +88,6 @@ def main() -> int:
     bc.set_categories(Reference(w2, min_col=1, min_row=2, max_row=n))
     ws.add_chart(bc, "H22")
 
-    # Attrition
     w3 = wb.create_sheet("Attrition")
     header(w3, 1, ["Month-end", "Segment", "Opening clients", "Churned clients", "New clients", "Closing clients", "Attrition rate"])
     for i, a in enumerate(att["monthly"], 2):
@@ -117,7 +105,6 @@ def main() -> int:
     widths(w3, [24, 16, 16, 16, 12, 16, 16])
     w3.freeze_panes = "A2"
 
-    # Client risk
     w4 = wb.create_sheet("Client Risk")
     header(w4, 1, ["Risk level", "Segment", "Clients", "AUM (Rs crore)"])
     for x in risk:
@@ -132,7 +119,6 @@ def main() -> int:
     w4.conditional_formatting.add(f"I{start + 1}:I{start + len(top)}", CellIsRule(operator="equal", formula=['"High"'], font=Font(color="C0262E", bold=True)))
     widths(w4, [12, 16, 16, 14, 10, 16, 18, 10, 12, 60])
 
-    # Advisors
     w5 = wb.create_sheet("Advisors")
     header(w5, 1, ["Advisor", "Branch", "Team", "Active clients", "AUM (Rs crore)", "NNM 12m (Rs crore)", "Net flow rate (12m)", "Contacts per client-month", "Growth rank", "Contact rank", "Flags"])
     for i, a in enumerate(sorted(adv["advisors"], key=lambda x: x["growth_rank"]), 2):
@@ -146,7 +132,6 @@ def main() -> int:
     widths(w5, [14, 14, 16, 14, 16, 18, 22, 22, 12, 12, 24])
     w5.freeze_panes = "B2"
 
-    # Data quality
     w6 = wb.create_sheet("Data Quality")
     header(w6, 1, ["Rule", "Category", "Checked", "Failures", "Pass %", "Note"])
     for i, s in enumerate(dq["scorecard"], 2):
@@ -198,7 +183,6 @@ Analytics team
     (OUT / "weekly_email_draft.md").write_text(md, encoding="utf-8")
     print(f"Wrote {OUT / 'weekly_metrics_report.xlsx'} and weekly_email_draft.md")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

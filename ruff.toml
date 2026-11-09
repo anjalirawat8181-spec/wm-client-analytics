@@ -1,9 +1,6 @@
-# Lint the standard error classes: syntax errors, undefined names, unused imports/variables, bad comparisons.
 [lint]
 select = ["E4", "E7", "E9", "F"]
 
-# The generator was written before linting and its output is pinned by seed (byte-identical CSVs), so it is not refactored here.
-# These ignores cover only style findings in that code (imports after sys.path setup, lambdas, unused locals), not errors.
 [lint.per-file-ignores]
 "data_generation/*.py" = ["E402", "E731", "F841"]
 "automation/*.py" = ["E402"]

@@ -1,9 +1,3 @@
-"""Measure a monthly roll-up before and after the index in sql/schema/05_performance_indexes.sql.
-
-Usage: python automation/optimization_demo.py
-Drops the demo index if present, measures 5 EXPLAIN (ANALYZE, BUFFERS) runs, creates the index, runs ANALYZE, measures 5 more,
-and writes docs/query_optimization.md with the real numbers (medians). The index stays in place afterwards.
-"""
 import json
 import statistics
 import sys
@@ -11,7 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from db import ROOT, connect  # noqa: E402
+from db import ROOT, connect
 
 INDEX = "idx_holdings_snapshot_date"
 INDEX_SQL = (ROOT / "sql" / "schema" / "05_performance_indexes.sql").read_text(encoding="utf-8")
@@ -28,13 +22,11 @@ GROUP BY c.segment, p.asset_class
 ORDER BY c.segment, p.asset_class
 """
 
-
 def walk(node, out):
     out.append(node)
     for ch in node.get("Plans", []):
         walk(ch, out)
     return out
-
 
 def measure(cur):
     runs, nodes_desc, text_plan = [], "", ""
@@ -53,10 +45,8 @@ def measure(cur):
     text_plan = "\n".join(r[0] for r in cur.fetchall())
     return runs, nodes_desc, text_plan
 
-
 def med(runs, k):
     return statistics.median(r[k] for r in runs)
-
 
 def main() -> int:
     conn = connect()
@@ -109,7 +99,6 @@ def main() -> int:
     (ROOT / "docs" / "query_optimization.md").write_text("\n".join(L), encoding="utf-8")
     print(f"before median {b:.1f} ms ({before_node}); after median {a:.1f} ms ({after_node}); index {idx_mb:.1f} MB")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,17 +1,11 @@
-"""Recreate the analytics schema and all its views from sql/analytics/*.sql (idempotent, one transaction).
-
-Usage: python automation/apply_analytics.py
-Views are plain (not materialised) and read only the mart, so dropping and recreating them loses no data.
-"""
 import sys
 import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from db import ROOT, connect  # noqa: E402
+from db import ROOT, connect
 
 SQL_DIR = ROOT / "sql" / "analytics"
-
 
 def apply(conn=None, verbose=True) -> int:
     own = conn is None
@@ -41,7 +35,6 @@ def apply(conn=None, verbose=True) -> int:
     finally:
         if own:
             conn.close()
-
 
 if __name__ == "__main__":
     sys.exit(apply())

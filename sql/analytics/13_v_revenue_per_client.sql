@@ -1,8 +1,3 @@
--- View: analytics.v_revenue_per_client
--- Business question: How much fee revenue does an active client generate in a month?
--- KPI dictionary refs: Revenue per Client (fee revenue booked in the month for clients active at month-end / count of those
---   clients; monthly, not annualised; NULL when no active clients). Churned clients are excluded here and shown in v_revenue_lost.
--- Grain: one row per month-end x segment, plus segment = 'All'.
 CREATE OR REPLACE VIEW analytics.v_revenue_per_client AS
 SELECT k.snapshot_date,
        coalesce(k.segment, 'All')                              AS segment,

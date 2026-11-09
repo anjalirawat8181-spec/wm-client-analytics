@@ -1,7 +1,3 @@
--- View: analytics.v_monthly_overview
--- Business question: What is the firm-wide headline picture each month (the numbers on the executive page)?
--- KPI dictionary refs: AUM, Net New Money, Attrition Rate, Revenue per Client, revenue lost, Active client.
--- Grain: one row per month-end (firm total, segment = 'All').
 CREATE OR REPLACE VIEW analytics.v_monthly_overview AS
 SELECT a.snapshot_date,
        a.aum, a.nnm, a.inflows, a.outflows, a.active_clients,

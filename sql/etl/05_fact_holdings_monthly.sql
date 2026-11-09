@@ -1,5 +1,3 @@
--- ETL step 5: staging.holdings_monthly -> mart.fact_holdings_monthly
--- Rule order: 2 market_value < 0, 3 orphan client, 5 any other constraint (including a repeated primary key).
 CREATE TEMP TABLE _hold ON COMMIT DROP AS
 WITH x AS (
     SELECT s.client_id, s.product_id, s.snapshot_date, s.units, s.market_value,

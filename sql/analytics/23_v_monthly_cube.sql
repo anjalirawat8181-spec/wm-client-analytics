@@ -1,8 +1,3 @@
--- View: analytics.v_monthly_cube
--- Business question: Can the dashboard filter every headline KPI by segment and branch at once?
--- KPI dictionary refs: AUM, Net New Money, Active client, Attrition Rate (opening/churned, so rates are rebuilt from sums
---   after filtering), Revenue per Client (fee revenue of active clients), revenue lost (last pre-churn month revenue).
--- Grain: one row per month-end x segment x branch. Counts and sums only, so any filter combination can be re-aggregated.
 CREATE OR REPLACE VIEW analytics.v_monthly_cube AS
 SELECT k.snapshot_date, k.segment, k.branch,
        sum(k.aum)                                                         AS aum,
