@@ -174,11 +174,26 @@ def main() -> int:
     conn.close()
 
     strict_fail = [s for s in scorecard if s["strict"] and s["failures"] > 0]
+    # Without the hidden truth files (CI) the planted-vs-caught comparison cannot be recomputed. The last local result is carried
+    # forward, labelled with when it was produced, instead of being dropped or invented.
+    prior_path = ROOT / "reports" / "dq_scorecard.json"
+    carried = {}
+    if not detection and prior_path.exists():
+        old = json.loads(prior_path.read_text(encoding="utf-8"))
+        carried = {"detection": old.get("detection", []), "mart_vs_clean": old.get("mart_vs_clean", []),
+                   "detection_note": "Planted-vs-caught and mart-vs-clean comparisons need the hidden answer key, which is not in CI; "
+                                     f"these rows are carried forward from the local run at {old.get('detection_generated_at') or old.get('generated_at')}.",
+                   "detection_generated_at": old.get("detection_generated_at") or old.get("generated_at"),
+                   "carried_scorecard": [x for x in old.get("scorecard", []) if x["category"] in ("detection", "mart_vs_clean")]}
+        detection, diffs = carried["detection"], carried["mart_vs_clean"]
+        scorecard.extend(carried["carried_scorecard"])
     out = {"generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
            "overall": {"rules": len(scorecard), "rules_passing": sum(1 for s in scorecard if s["failures"] == 0),
                        "strict_failures": len(strict_fail),
                        "rows_checked": sum(s["checked"] for s in scorecard if s["category"] != "detection")},
-           "reconciliation": recon, "detection": detection, "mart_vs_clean": diffs, "scorecard": scorecard}
+           "reconciliation": recon, "detection": detection, "mart_vs_clean": diffs, "scorecard": scorecard,
+           "detection_note": carried.get("detection_note"),
+           "detection_generated_at": carried.get("detection_generated_at") or datetime.now(timezone.utc).isoformat(timespec="seconds")}
     (ROOT / "reports").mkdir(exist_ok=True)
     (ROOT / "reports" / "dq_scorecard.json").write_text(json.dumps(out, indent=2, default=str), encoding="utf-8")
 

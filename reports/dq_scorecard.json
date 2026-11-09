@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-09T07:41:47+00:00",
+  "generated_at": "2026-11-09T07:59:10+00:00",
   "overall": {
     "rules": 35,
     "rules_passing": 34,
@@ -568,5 +568,7 @@
       "note": "no NULL KYC, no non-positive amount, no negative market value in the mart",
       "strict": true
     }
-  ]
+  ],
+  "detection_note": null,
+  "detection_generated_at": "2026-11-09T07:59:10+00:00"
 }

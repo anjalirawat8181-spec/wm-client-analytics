@@ -1,0 +1,51 @@
+priority_rank,client_id,segment,branch,advisor_id,aum,days_since_last_contact,risk_score,risk_level,reasons
+1,14831,Mass Affluent,Delhi NCR,20,1552793,403,3,High,"no contact for 180+ days, idle cash above 30%"
+2,13446,Mass Affluent,Mumbai,12,747516,321,3,High,"no contact for 180+ days, idle cash above 30%"
+3,11892,Mass Affluent,Delhi NCR,24,389994,300,3,High,"no contact for 180+ days, idle cash above 30%"
+4,10384,UHNI,Delhi NCR,24,237632708,194,2,Medium,no contact for 180+ days
+5,10065,UHNI,Delhi NCR,24,148681094,353,2,Medium,no contact for 180+ days
+6,11686,UHNI,Delhi NCR,24,110321737,364,2,Medium,no contact for 180+ days
+7,12212,UHNI,Delhi NCR,24,71310560,269,2,Medium,no contact for 180+ days
+8,13809,HNI,Pune,47,52531135,180,2,Medium,no contact for 180+ days
+9,12874,HNI,Delhi NCR,24,47257366,620,2,Medium,no contact for 180+ days
+10,13667,HNI,Pune,46,45903843,395,2,Medium,no contact for 180+ days
+11,12650,HNI,Delhi NCR,24,41848220,186,2,Medium,no contact for 180+ days
+12,13323,HNI,Pune,46,28729204,282,2,Medium,no contact for 180+ days
+13,11438,HNI,Pune,46,25471242,412,2,Medium,no contact for 180+ days
+14,10789,HNI,Bengaluru,39,25165439,297,2,Medium,no contact for 180+ days
+15,11568,HNI,Mumbai,15,24937935,186,2,Medium,no contact for 180+ days
+16,13412,HNI,Pune,48,24494623,198,2,Medium,no contact for 180+ days
+17,10707,HNI,Pune,46,24021219,481,2,Medium,no contact for 180+ days
+18,12338,HNI,Delhi NCR,24,23196675,433,2,Medium,no contact for 180+ days
+19,13747,HNI,Delhi NCR,21,20309077,192,2,Medium,no contact for 180+ days
+20,11097,HNI,Delhi NCR,24,19902219,756,2,Medium,no contact for 180+ days
+21,14763,HNI,Bengaluru,34,16637141,368,2,Medium,no contact for 180+ days
+22,10969,HNI,Mumbai,4,16272117,404,2,Medium,no contact for 180+ days
+23,12330,HNI,Bengaluru,34,16159355,183,2,Medium,no contact for 180+ days
+24,13557,HNI,Delhi NCR,24,15997481,395,2,Medium,no contact for 180+ days
+25,14110,HNI,Bengaluru,31,15911945,188,2,Medium,no contact for 180+ days
+26,13878,HNI,Pune,46,15177919,209,2,Medium,no contact for 180+ days
+27,10095,HNI,Mumbai,4,13446650,204,2,Medium,no contact for 180+ days
+28,13902,HNI,Mumbai,13,9971160,322,2,Medium,no contact for 180+ days
+29,11231,HNI,Pune,59,9157799,277,2,Medium,no contact for 180+ days
+30,14904,HNI,Bengaluru,42,9145620,216,2,Medium,no contact for 180+ days
+31,11573,HNI,Bengaluru,34,8819763,245,2,Medium,no contact for 180+ days
+32,12109,HNI,Mumbai,9,8443895,194,2,Medium,no contact for 180+ days
+33,13575,HNI,Delhi NCR,30,7468703,247,2,Medium,no contact for 180+ days
+34,11213,HNI,Delhi NCR,24,6999314,277,2,Medium,no contact for 180+ days
+35,13580,HNI,Delhi NCR,26,5907633,492,2,Medium,no contact for 180+ days
+36,13500,HNI,Mumbai,3,5704860,193,2,Medium,no contact for 180+ days
+37,10016,HNI,Pune,59,5189804,364,2,Medium,no contact for 180+ days
+38,12999,HNI,Delhi NCR,24,5174373,216,2,Medium,no contact for 180+ days
+39,11654,HNI,Delhi NCR,24,4819434,200,2,Medium,no contact for 180+ days
+40,10219,HNI,Pune,46,4181608,505,2,Medium,no contact for 180+ days
+41,12745,Mass Affluent,Bengaluru,34,3922346,195,2,Medium,no contact for 180+ days
+42,14202,Mass Affluent,Bengaluru,36,3854987,248,2,Medium,no contact for 180+ days
+43,11099,Mass Affluent,Mumbai,14,3662995,364,2,Medium,no contact for 180+ days
+44,11165,HNI,Bengaluru,39,3577718,224,2,Medium,no contact for 180+ days
+45,13596,Mass Affluent,Mumbai,14,3569745,364,2,Medium,no contact for 180+ days
+46,10227,Mass Affluent,Bengaluru,39,2960077,263,2,Medium,no contact for 180+ days
+47,12549,Mass Affluent,Delhi NCR,19,2927678,251,2,Medium,no contact for 180+ days
+48,10406,Mass Affluent,Pune,55,2554362,279,2,Medium,no contact for 180+ days
+49,13799,Mass Affluent,Bengaluru,39,2529267,202,2,Medium,no contact for 180+ days
+50,14998,Mass Affluent,Delhi NCR,24,2464623,370,2,Medium,no contact for 180+ days
