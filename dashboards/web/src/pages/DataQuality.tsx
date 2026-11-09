@@ -55,7 +55,7 @@ export default function DataQuality() {
               {stats.strictPass}
               <span className="text-muted"> / {stats.strict}</span>
             </p>
-            <p className="mt-2 text-[13px] text-muted">{data.scorecard.length - stats.strict} further checks are informational</p>
+            <p className="mt-2 text-[13px] text-muted">{data.scorecard.length - stats.strict} further {data.scorecard.length - stats.strict === 1 ? "check is" : "checks are"} informational</p>
           </div>
           <div>
             <p className="text-[13px] text-muted">Staged rows unaccounted for</p>
