@@ -81,6 +81,7 @@ The same seed gives byte-identical CSVs (every file's SHA256 is recorded in `out
 - **No transactions before the window**, and none in January 2025 for pre-window clients: January holdings are just the opening balances.
 - **Interactions before the window** exist only for the 6 months before it.
 - **Churn is decided before holdings are simulated**, from contact gaps only; a few clients are counted by the KPI definition in a different month than the truth file plans.
+- **January 2025 joiners have no data.** The 34 clients onboarded in January 2025 have no holdings, transactions or revenue (no transactions are generated in January 2025), so they are never active. This contradicts the "every new client is active at their first month-end" limitation in the KPI dictionary for that month only. The cohort retention view excludes that cohort; every other KPI treats them as inactive.
 - **Staging size is an estimate** (CSV bytes plus row overhead); the loader prints real sizes after loading.
 
 ## (f) Resolved KPI questions

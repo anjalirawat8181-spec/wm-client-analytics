@@ -156,7 +156,8 @@ def main() -> int:
     write("dq_scorecard.json", {"generated_at": dq.get("generated_at"), "overall": dq.get("overall"),
                                 "reconciliation": dq.get("reconciliation", []), "detection": dq.get("detection", []),
                                 "detection_note": dq.get("detection_note"),
-                                "mart_vs_clean": dq.get("mart_vs_clean", []), "scorecard": dq.get("scorecard", []),
+                                "mart_vs_clean": [{"table": d["table"], "rows_differing": d["rows_differing"], "unexpected": d["unexpected"]} for d in dq.get("mart_vs_clean", [])],
+                                "scorecard": dq.get("scorecard", []),
                                 "exceptions": records(dq_view)}, must_have_rows=False)
     if not dq.get("scorecard"):
         raise SystemExit("EXPORT FAILED: reports/dq_scorecard.json missing or empty; run automation/dq_report.py first")

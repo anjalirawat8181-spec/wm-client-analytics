@@ -1,0 +1,148 @@
+@import "@fontsource/inter/latin-400.css";
+@import "@fontsource/inter/latin-500.css";
+@import "@fontsource/inter/latin-600.css";
+@import "@fontsource/inter/latin-700.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root,
+:root[data-theme="dark"] {
+  --bg: #0b1020;
+  --surface: #121a30;
+  --surface2: #18223d;
+  --border: #22304f;
+  --text: #e8ecf6;
+  --muted: #8fa0c2;
+  --gold: #c9a24b;
+  --gold-hi: #e6c878;
+  --positive: #3ccfb4;
+  --negative: #f2646a;
+  --indigo: #6c7cff;
+  --c1: #6c7cff;
+  --c2: #c9a24b;
+  --c3: #3ccfb4;
+  --c4: #f2a65a;
+  --c5: #b07cff;
+  --c6: #8fa0c2;
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 8px 24px rgba(0, 0, 0, 0.28);
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg: #f4f6fb;
+  --surface: #ffffff;
+  --surface2: #eef1f8;
+  --border: #d9dfec;
+  --text: #0f1830;
+  --muted: #55657f;
+  --gold: #7a560a;
+  --gold-hi: #7a560a;
+  --positive: #086656;
+  --negative: #c0262e;
+  --indigo: #4352d4;
+  --c1: #4352d4;
+  --c2: #8a6512;
+  --c3: #086656;
+  --c4: #b4600f;
+  --c5: #7a3fd1;
+  --c6: #55657f;
+  --shadow: 0 1px 2px rgba(15, 24, 48, 0.06), 0 8px 24px rgba(15, 24, 48, 0.06);
+  color-scheme: light;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+body {
+  margin: 0;
+  overflow-x: hidden;
+}
+.num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+:focus-visible {
+  outline: 2px solid var(--gold-hi);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--surface2), var(--border), var(--surface2));
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+  border-radius: 8px;
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+  * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
+.recharts-text,
+.recharts-cartesian-axis-tick-value {
+  fill: var(--muted);
+  font-size: 11px;
+}
+.recharts-legend-item-text {
+  color: var(--muted) !important;
+  font-size: 12px;
+}
+select,
+input {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 12px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+td {
+  white-space: nowrap;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+tr:last-child td {
+  border-bottom: 0;
+}
+.chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  margin: 2px 4px 2px 0;
+}
