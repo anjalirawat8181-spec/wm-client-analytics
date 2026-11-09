@@ -1,7 +1,7 @@
 # wm-client-analytics
 
-[![CI](https://github.com/<OWNER>/wm-client-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/<OWNER>/wm-client-analytics/actions/workflows/ci.yml)
-[![Deploy](https://github.com/<OWNER>/wm-client-analytics/actions/workflows/deploy.yml/badge.svg)](https://github.com/<OWNER>/wm-client-analytics/actions/workflows/deploy.yml)
+[![CI](https://github.com/anjalirawat8181-spec/wm-client-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/anjalirawat8181-spec/wm-client-analytics/actions/workflows/ci.yml)
+[![Deploy](https://github.com/anjalirawat8181-spec/wm-client-analytics/actions/workflows/deploy.yml/badge.svg)](https://github.com/anjalirawat8181-spec/wm-client-analytics/actions/workflows/deploy.yml)
 
 **Which clients are we about to lose, and how would we know in time?** A wealth-management analytics project: synthetic client data, a governed pipeline with proof that the data is clean, a written KPI dictionary, SQL analytics, and a live dashboard that rebuilds itself every week.
 
@@ -9,7 +9,7 @@
 
 ## Live dashboard
 
-**https://<OWNER>.github.io/wm-client-analytics/** (static site, refreshed every Monday and on every push to main). All data is synthetic.
+**https://anjalirawat8181-spec.github.io/wm-client-analytics/** (static site, refreshed every Monday and on every push to main). All data is synthetic.
 
 ## Problem statement
 
