@@ -80,12 +80,14 @@ def main() -> int:
     exc_all = one("select count(*) from mart.dq_exceptions")
     exc = one("select count(*) from mart.dq_exceptions where rule_name <> 'null_kyc'")
     risk = dict(cur.execute("select risk_level, count(*) from analytics.v_churn_risk_score where snapshot_date=%s group by 1", (last,)) or cur.fetchall())
-    cur.execute("select advisor_id, nnm_per_client from analytics.v_advisor_scorecard order by growth_rank limit 1")
+    cur.execute("select advisor_id, net_flow_rate from analytics.v_advisor_scorecard order by growth_rank limit 1")
     top_adv, top_nnm = cur.fetchone()
     conn.close()
 
     ex, ch, ad, dq = ui["executive"], ui["client-health"], ui["advisors"], ui["data-quality"]
-    tile = lambda t, i: [x.strip() for x in t["tiles"][i].split("\n") if x.strip()][1]  # noqa: E731
+    def tile(t, i):
+        return [x.strip() for x in t["tiles"][i].split("\n") if x.strip()][1]
+
     rows = []
 
     def add(item, shown, expected):
@@ -111,8 +113,8 @@ def main() -> int:
     add("Data quality: rows logged and kept out of the KPIs (exceptions minus repaired KYC rows)", m.group(1) if m else "missing", group_indian(exc))
     m = re.search(r"every one of ([\d,]+) staged rows", dq["takeaway"])
     add("Data quality: staged rows", m.group(1) if m else "missing", group_indian(stg))
-    m = re.search(r"Advisor " + str(top_adv) + r".*?Rs ([\d.]+) lakh", ad["main"], re.S)
-    add(f"Advisors: top growth advisor ({top_adv}) NNM per client", f"Rs {m.group(1)} lakh" if m else "missing", rupees(float(top_nnm)))
+    m = re.search(r"Advisor " + str(top_adv) + r".*?([\d.]+)%", ad["main"], re.S)
+    add(f"Advisors: net flow rate of the top-ranked advisor ({top_adv})", f"{m.group(1)}%" if m else "missing", f"{100 * float(top_nnm):.1f}%")
 
     lh = json.loads((ROOT / "docs" / "lighthouse_scores.json").read_text(encoding="utf-8")) if (ROOT / "docs" / "lighthouse_scores.json").exists() else []
     shots = sorted(p.name for p in (ROOT / "docs" / "screenshots").glob("*.png"))

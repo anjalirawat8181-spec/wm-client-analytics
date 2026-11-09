@@ -4,19 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
-    <title>Wealth Client Analytics</title>
-    <meta name="description" content="Private-banking style client analytics dashboard: AUM, net new money, attrition, advisor performance and data quality. All data is synthetic." />
-    <meta name="theme-color" content="#0B1020" />
-    <meta property="og:title" content="Wealth Client Analytics" />
+    <title>WM Analytics</title>
+    <meta name="description" content="Client analytics for a wealth manager: AUM, net new money, attrition, advisors and data quality. All data is synthetic." />
+    <meta name="theme-color" content="#f6f5f2" />
+    <meta property="og:title" content="WM Analytics" />
     <meta property="og:description" content="AUM, net new money, attrition, advisors and data quality on synthetic wealth-management data." />
     <meta property="og:type" content="website" />
+    <style>
+      html { background: #f6f5f2; }
+      html[data-theme="dark"] { background: #121214; }
+    </style>
     <script>
-      // Apply the saved theme before first paint to avoid a flash. Storage can throw (private mode), so guard it.
       (function () {
         var t = null;
         try { t = localStorage.getItem("wm-theme"); } catch (e) { t = null; }
         if (t !== "light" && t !== "dark") {
-          t = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+          t = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
         }
         document.documentElement.setAttribute("data-theme", t);
       })();

@@ -41,9 +41,9 @@ for (const mode of MODES) {
     // Charts mount lazily as they scroll into view, so show the whole page first, then wait for the charts.
     const full = await page.evaluate(() => document.documentElement.scrollHeight);
     await page.setViewportSize({ width: mode.viewport.width, height: Math.min(full, 6000) });
-    if (["executive", "client-health"].includes(name)) await page.waitForSelector(".recharts-surface", { timeout: 20000 });
+    if (["executive", "client-health"].includes(name)) await page.waitForSelector("svg[role=img]", { timeout: 20000 });
     await page.waitForTimeout(3000); // let mount animations finish
-    const charts = await page.locator(".recharts-surface").count();
+    const charts = await page.locator("svg[role=img]").count();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     // A fullPage screenshot resizes the viewport, which restarts chart mount animations mid-capture. Resize first, wait, then capture.
     await page.screenshot({ path: `${OUT}/${PREFIX}${name}-${mode.name}.png` });

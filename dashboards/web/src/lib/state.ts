@@ -13,7 +13,7 @@ export const useTheme = () => useContext(ThemeContext);
 export interface FilterCtx {
   filters: Filters;
   setFilters: (f: Filters) => void;
-  months: string[]; // all month-end dates available
+  months: string[];
   branches: string[];
   ready: boolean;
 }
@@ -26,7 +26,6 @@ export const FilterContext = createContext<FilterCtx>({
 });
 export const useFilters = () => useContext(FilterContext);
 
-/** True when the user asked the OS to reduce motion. Charts switch their mount animation off. */
 export function usePrefersReducedMotion(): boolean {
   const [reduced, setReduced] = useState(() =>
     typeof window !== "undefined" && window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)").matches : false,

@@ -1,9 +1,8 @@
-import { ExternalLink } from "lucide-react";
 import { REPO_URL } from "../lib/env";
 import { useJson } from "../lib/data";
 import { formatMonth } from "../lib/format";
 import type { Meta } from "../lib/types";
-import { Card, Footnote, PageHeader } from "../components/ui";
+import { Footnote, PageHeader, Panel } from "../components/ui";
 
 const KPIS: { name: string; rule: string }[] = [
   { name: "AUM", rule: "Sum of market value across all products, cash included, at the last day of the month. Closed clients count as 0 from the closure month-end. Negative market values are treated as dirty data and excluded." },
@@ -14,33 +13,28 @@ const KPIS: { name: string; rule: string }[] = [
   { name: "Idle cash", rule: "Cash share of AUM. A client is flagged idle when it is above 30% for 2 or more consecutive months. Clients below Rs 1 lakh are excluded." },
   { name: "Concentration", rule: "Largest single non-cash product divided by AUM (AUM still includes cash). Flagged above 40%. A cash-only client has no concentration." },
   { name: "Days since last contact", rule: "Month-end minus the date of the latest connected interaction (missed calls and unanswered emails do not count). Never contacted: days since onboarding. At risk from 90 days, critical from 180." },
+  { name: "Net flow rate", rule: "For an advisor: net new money of their clients over 12 months divided by those clients' AUM at the opening month-end. Used to compare advisors with books of different sizes." },
   { name: "Segment", rule: "Fixed at onboarding by onboarding AUM: Mass Affluent below Rs 25 lakh, HNI from Rs 25 lakh to Rs 5 crore (both boundaries included), UHNI above Rs 5 crore." },
 ];
 
-const STEPS = ["Synthetic generator", "Staging (raw, dirty)", "ETL and quality rules", "Mart (star schema)", "Analytics views", "JSON export", "Static dashboard"];
+const STEPS = ["Synthetic generator", "Staging", "ETL and quality rules", "Mart", "Analytics views", "JSON export", "Static site"];
 
 function Lineage() {
-  const w = 150, gap = 22, h = 64;
   return (
-    <div className="overflow-x-auto">
-      <svg width={STEPS.length * (w + gap)} height={h + 30} role="img" aria-label={`Data lineage: ${STEPS.join(", then ")}`} className="min-w-full">
-        <defs>
-          <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="var(--muted)" /></marker>
-        </defs>
-        {STEPS.map((s, i) => {
-          const x = i * (w + gap) + 4;
-          const [a, ...rest] = s.split(" (");
-          return (
-            <g key={s}>
-              <rect x={x} y={14} width={w - 8} height={h} rx={12} fill="var(--surface2)" stroke={i === 3 ? "var(--gold)" : "var(--border)"} strokeWidth={i === 3 ? 2 : 1} />
-              <text x={x + (w - 8) / 2} y={h / 2 + 12} textAnchor="middle" style={{ fill: "var(--text)", fontSize: 12.5, fontWeight: 600 }}>{a}</text>
-              {rest.length > 0 && <text x={x + (w - 8) / 2} y={h / 2 + 30} textAnchor="middle" style={{ fill: "var(--muted)", fontSize: 11 }}>({rest.join(" (")}</text>}
-              {i < STEPS.length - 1 && <line x1={x + w - 6} y1={14 + h / 2} x2={x + w + gap - 8} y2={14 + h / 2} stroke="var(--muted)" strokeWidth="1.5" markerEnd="url(#arrow)" />}
-            </g>
-          );
-        })}
-      </svg>
-    </div>
+    <ol className="flex flex-wrap items-center gap-x-2 gap-y-3 text-sm" aria-label={`Data lineage: ${STEPS.join(", then ")}`}>
+      {STEPS.map((s, i) => (
+        <li key={s} className="flex items-center gap-2">
+          <span className={`rounded-xl px-3 py-1.5 ${i === 3 ? "font-medium text-accent" : "text-ink"}`} style={{ background: "var(--line)" }}>
+            {s}
+          </span>
+          {i < STEPS.length - 1 && (
+            <svg width="16" height="10" viewBox="0 0 16 10" aria-hidden="true">
+              <path d="M0 5h14M10 1l4 4-4 4" fill="none" stroke="var(--grey-1)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </li>
+      ))}
+    </ol>
   );
 }
 
@@ -49,55 +43,75 @@ export default function Methodology() {
   const m = meta.data;
   return (
     <div>
-      <PageHeader title="Methodology" takeaway="How every number on this site is defined, where it comes from and why you can trust or question it." />
+      <PageHeader title="Methodology" takeaway="How each number on this site is defined, where it comes from, and what to be careful about." />
 
-      <Card title="Synthetic data disclaimer" className="border-gold/40">
-        <p className="text-sm leading-relaxed text-ink">
+      <Panel title="About the data">
+        <p className="max-w-3xl text-[15px] leading-relaxed text-ink">
           Every client, advisor, balance and transaction here is fictional and produced by a seeded generator. The generator plants known behaviours (clients who are not contacted
-          leave more often, differences between segments and advisors, outflows before a client leaves) and a known set of dirty records. The patterns are found because they were
-          put there; what this project demonstrates is the method: modelling, cleaning, KPI definition, validation and delivery.
+          leave more often, differences between segments and advisors, outflows before a client leaves) and a known set of dirty records. The patterns are found because they were put
+          there. What this project demonstrates is the method: modelling, cleaning, KPI definition, validation and delivery.
         </p>
-      </Card>
+      </Panel>
 
-      <Card className="mt-4" title="Data lineage" subtitle="Each arrow is a script in the repository; nothing is edited by hand">
+      <Panel className="mt-6" title="Where the numbers come from" subtitle="Each step is a script in the repository; nothing is edited by hand">
         <Lineage />
-      </Card>
+      </Panel>
 
-      <Card className="mt-4" title="KPI definitions" subtitle="Condensed from the KPI dictionary, which is the single source of truth">
-        <dl className="grid gap-x-8 gap-y-4 md:grid-cols-2">
+      <Panel className="mt-6" title="KPI definitions" subtitle="Shortened from the KPI dictionary, which is the single source of truth">
+        <dl className="grid gap-x-10 gap-y-6 md:grid-cols-2">
           {KPIS.map((k) => (
             <div key={k.name}>
-              <dt className="text-sm font-semibold text-gold2">{k.name}</dt>
-              <dd className="mt-0.5 text-sm leading-relaxed text-muted">{k.rule}</dd>
+              <dt className="text-sm font-medium text-ink">{k.name}</dt>
+              <dd className="mt-1 text-sm leading-relaxed text-muted">{k.rule}</dd>
             </div>
           ))}
         </dl>
-      </Card>
+      </Panel>
 
-      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Card title="Build details">
+      <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+        <Panel title="This build">
           {m ? (
-            <dl className="space-y-1.5 text-sm">
-              <div className="flex justify-between gap-3"><dt className="text-muted">Data window</dt><dd className="num text-ink">{formatMonth(m.data_window.first_month_end)} to {formatMonth(m.data_window.last_month_end)} ({m.data_window.months} month-ends)</dd></div>
-              <div className="flex justify-between gap-3"><dt className="text-muted">Generated</dt><dd className="num text-ink">{m.generated_at.slice(0, 16).replace("T", " ")} UTC</dd></div>
-              <div className="flex justify-between gap-3"><dt className="text-muted">Commit</dt><dd className="num text-ink">{m.commit}</dd></div>
-              <div className="flex justify-between gap-3"><dt className="text-muted">Clients in the mart</dt><dd className="num text-ink">{m.row_counts.dim_client?.toLocaleString("en-IN")}</dd></div>
+            <dl className="space-y-2 text-sm">
+              <div className="flex justify-between gap-3">
+                <dt className="text-muted">Data window</dt>
+                <dd className="num text-ink">
+                  {formatMonth(m.data_window.first_month_end)} to {formatMonth(m.data_window.last_month_end)}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-muted">Month-ends</dt>
+                <dd className="num text-ink">{m.data_window.months}</dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-muted">Built</dt>
+                <dd className="num text-ink">{m.generated_at.slice(0, 16).replace("T", " ")} UTC</dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-muted">Commit</dt>
+                <dd className="num text-ink">{m.commit}</dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-muted">Clients in the mart</dt>
+                <dd className="num text-ink">{m.row_counts.dim_client?.toLocaleString("en-IN")}</dd>
+              </div>
             </dl>
-          ) : <p className="text-sm text-muted">Loading build details.</p>}
-        </Card>
-        <Card title="Limitations">
-          <ul className="list-disc space-y-1.5 pl-5 text-sm text-muted">
-            <li>Snapshot dashboard: it shows the data as of the last build, not a live feed.</li>
+          ) : (
+            <p className="text-sm text-muted">Loading build details.</p>
+          )}
+        </Panel>
+        <Panel title="Limitations">
+          <ul className="list-disc space-y-2 pl-5 text-sm text-muted">
+            <li>This is a snapshot taken at the last build, not a live feed.</li>
             <li>Returning clients are not simulated: a client who leaves never comes back.</li>
-            <li>Returns come from a statistical factor model, not real fund prices.</li>
-            <li>Advisor growth rankings are noisy over a single year; treat them as a prompt to look, not a verdict.</li>
+            <li>Returns come from a statistical model, not real fund prices.</li>
+            <li>Advisor growth over one year is noisy; treat rankings as a prompt to look, not a verdict.</li>
           </ul>
-          <a href={REPO_URL} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-gold2 underline-offset-2 hover:underline">
-            Source code and full documentation <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+          <a href={REPO_URL} target="_blank" rel="noreferrer" className="mt-5 inline-block text-sm font-medium text-accent hover:underline">
+            Source code and full documentation
           </a>
-        </Card>
+        </Panel>
       </div>
-      <Footnote>Definitions here are shortened; the full KPI dictionary with edge cases and a worked example is in the repository under docs/kpi_dictionary.md.</Footnote>
+      <Footnote>Definitions here are shortened; the full KPI dictionary, with edge cases and a worked example, is in the repository under docs/kpi_dictionary.md.</Footnote>
     </div>
   );
 }

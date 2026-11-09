@@ -9,5 +9,6 @@ const a = r.lhr.audits;
 for (const k of ["first-contentful-paint", "largest-contentful-paint", "total-blocking-time", "cumulative-layout-shift", "speed-index", "interactive"]) console.log(k, a[k].displayValue);
 console.log("LCP element:", JSON.stringify(a["largest-contentful-paint-element"]?.details?.items?.[0]?.items?.[0]?.node?.snippet ?? ""));
 for (const n of a["color-contrast"].details?.items ?? []) console.log("contrast:", n.node.snippet.slice(0, 110), "|", n.node.explanation?.slice(0, 160));
+for (const it of a["layout-shift-elements"]?.details?.items ?? []) console.log("shift", JSON.stringify(it.score), String(it.node?.snippet ?? "").slice(0, 120));
 for (const k of ["unused-javascript", "render-blocking-resources", "mainthread-work-breakdown", "bootup-time"]) console.log(k, a[k].displayValue ?? "", a[k].score);
 await chrome.kill();

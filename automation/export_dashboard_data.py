@@ -86,7 +86,7 @@ def main() -> int:
     top = q(cur, f"select * from analytics.v_top_clients_at_risk order by priority_rank limit {TOP_AT_RISK}")
     top_all = q(cur, "select count(*) n from analytics.v_top_clients_at_risk").n[0]
     adv = q(cur, "select * from analytics.v_advisor_scorecard order by growth_rank, advisor_id")
-    advt = q(cur, "select advisor_id, snapshot_date, aum_rank, nnm_3m_rank, aum_rank_change from analytics.v_advisor_ranking_trend order by 1,2")
+    advt = q(cur, "select advisor_id, snapshot_date, aum_rank, net_flow_rank, aum_rank_change from analytics.v_advisor_ranking_trend order by 1,2")
     rpc = q(cur, "select * from analytics.v_revenue_per_client order by 1,2")
     rlost = q(cur, "select * from analytics.v_revenue_lost order by 1,2")
     rbs = q(cur, "select snapshot_date, segment, branch, sum(active_clients) active_clients, sum(fee_revenue) fee_revenue "
@@ -147,9 +147,9 @@ def main() -> int:
     write("cohort_retention.json", {"cohorts": records(coh), "summary": records(coh_s)})
     write("risk_distribution.json", records(risk))
     write("top_at_risk.json", records(top))
-    write("advisor_scorecard.json", {"advisors": records(adv), "trend": records(advt)})
+    write("advisor_scorecard.json", {"advisors": records(adv)})
     write("revenue.json", {"per_client": records(rpc), "lost": records(rlost), "by_segment_branch": records(rbs)})
-    write("allocation_mix.json", records(alloc))
+    write("allocation_mix.json", records(alloc[["snapshot_date", "segment", "asset_class", "share_pct"]]))
 
     dq_path = ROOT / "reports" / "dq_scorecard.json"
     dq = json.loads(dq_path.read_text(encoding="utf-8")) if dq_path.exists() else {}
@@ -169,7 +169,7 @@ def main() -> int:
     write("meta.json", meta, must_have_rows=False)
 
     for name, df in (("monthly_overview", overview), ("monthly_cube", cube), ("attrition_monthly", att), ("cohort_retention", coh),
-                     ("advisor_scorecard", adv), ("top_at_risk", top), ("asset_allocation", alloc), ("revenue_per_client", rpc),
+                     ("advisor_scorecard", adv), ("advisor_ranking_trend", advt), ("top_at_risk", top), ("asset_allocation", alloc), ("revenue_per_client", rpc),
                      ("branch_summary", branch)):
         df.to_csv(TABLEAU / f"{name}.csv", index=False)
     print(f"Export OK: {len(list(OUT.glob('*.json')))} JSON files, as of {summary['as_of']}")

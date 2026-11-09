@@ -137,24 +137,24 @@ export interface AdvisorRow {
   active_clients: number | null;
   aum: number | null;
   nnm_12m: number | null;
+  opening_aum: number | null;
+  net_flow_rate: number | null;
   nnm_per_client: number | null;
   connected_contacts_12m: number;
   contacts_per_client_month: number | null;
   aum_rank: number;
   growth_rank: number;
   contact_rank: number;
-  nnm_decile: number;
+  growth_decile: number;
   contact_decile: number;
 }
 export interface AdvisorFile {
   advisors: AdvisorRow[];
-  trend: { advisor_id: number; snapshot_date: string; aum_rank: number; nnm_3m_rank: number; aum_rank_change: number | null }[];
 }
 export interface AllocationRow {
   snapshot_date: string;
   segment: string;
   asset_class: string;
-  value: number;
   share_pct: number;
 }
 export interface DqRule {

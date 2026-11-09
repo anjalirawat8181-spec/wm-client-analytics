@@ -8,7 +8,7 @@ import { uniqueSorted } from "../lib/kpi";
 function initialTheme(): Theme {
   const saved = safeGet("wm-theme");
   if (saved === "light" || saved === "dark") return saved;
-  return window.matchMedia?.("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -16,7 +16,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     const meta = document.querySelector('meta[name="theme-color"]');
-    meta?.setAttribute("content", theme === "dark" ? "#0B1020" : "#F4F6FB");
+    meta?.setAttribute("content", theme === "dark" ? "#121214" : "#f6f5f2");
   }, [theme]);
   const toggle = useCallback(() => {
     setTheme((t) => {
