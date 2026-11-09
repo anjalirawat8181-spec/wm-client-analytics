@@ -1,0 +1,72 @@
+[
+  {
+    "name": "roll_forward_identity",
+    "description": "end value = round((prev value + net flows) x (1 + product return)), tolerance 1 rupee",
+    "file": "01_roll_forward_identity.sql"
+  },
+  {
+    "name": "roll_forward_exact",
+    "description": "same identity with zero tolerance (informational: rounding of the stored return)",
+    "file": "02_roll_forward_exact.sql"
+  },
+  {
+    "name": "switch_pairs_balance",
+    "description": "every switch_out has a switch_in on the next txn_id: same client, date, amount, different product",
+    "file": "03_switch_pairs_balance.sql"
+  },
+  {
+    "name": "deposits_withdrawals_on_cash",
+    "description": "deposits and withdrawals attach to the Cash product",
+    "file": "04_deposits_withdrawals_on_cash.sql"
+  },
+  {
+    "name": "no_txn_after_closed_date",
+    "description": "no transaction dated after the client's closed_date",
+    "file": "05_no_txn_after_closed_date.sql"
+  },
+  {
+    "name": "no_interaction_after_closed_date",
+    "description": "no interaction dated after the client's closed_date",
+    "file": "06_no_interaction_after_closed_date.sql"
+  },
+  {
+    "name": "no_holdings_from_closure_month_end",
+    "description": "closed clients have no holdings from the closure month-end onward (KPI: AUM is 0 there)",
+    "file": "07_no_holdings_from_closure_month_end.sql"
+  },
+  {
+    "name": "no_revenue_from_closure_month_end",
+    "description": "closed clients have no revenue row from the closure month-end onward",
+    "file": "08_no_revenue_from_closure_month_end.sql"
+  },
+  {
+    "name": "no_holdings_before_onboarding",
+    "description": "no holdings before the onboarding month-end",
+    "file": "09_no_holdings_before_onboarding.sql"
+  },
+  {
+    "name": "revenue_formula",
+    "description": "fee_revenue = sum(market_value x fee_pct / 100 / 12) within half a rupee (rounding), one row per client with holdings",
+    "file": "10_revenue_formula.sql"
+  },
+  {
+    "name": "segment_matches_onboarding_aum",
+    "description": "segment follows the onboarding_aum bands (25 lakh and 5 crore fall in HNI)",
+    "file": "11_segment_matches_onboarding_aum.sql"
+  },
+  {
+    "name": "dim_date_coverage",
+    "description": "1461 contiguous days, and every fact date lies inside the table",
+    "file": "12_dim_date_coverage.sql"
+  },
+  {
+    "name": "no_orphans_in_mart",
+    "description": "no fact row points at a missing client (FKs enforce this; this proves it independently)",
+    "file": "13_no_orphans_in_mart.sql"
+  },
+  {
+    "name": "no_nulls_and_negatives",
+    "description": "no NULL KYC, no non-positive amount, no negative market value in the mart",
+    "file": "14_no_nulls_and_negatives.sql"
+  }
+]

@@ -6,7 +6,6 @@ in CI they are absent, so the script falls back to the checks that need only the
 keeps the last planted-vs-caught numbers out of the report rather than inventing them.
 """
 import json
-import re
 import sys
 from collections import Counter
 from datetime import datetime, timezone
@@ -20,7 +19,7 @@ from db import ROOT, connect  # noqa: E402
 
 CLEAN = ROOT / "data_generation" / "output" / "clean"
 TRUTH = ROOT / "data_generation" / "output" / "truth"
-RULES_SQL = ROOT / "sql" / "data_quality" / "business_rules.sql"
+RULES_DIR = ROOT / "sql" / "data_quality"
 
 # staging table -> (mart table, key columns used to compare with clean CSV)
 TABLES = {
@@ -46,14 +45,9 @@ def fetch_df(cur, sql):
     return pd.DataFrame(cur.fetchall(), columns=[d[0] for d in cur.description])
 
 
-def parse_checks(text):
-    blocks = re.split(r"^-- check: ", text, flags=re.M)[1:]
-    out = []
-    for b in blocks:
-        head, _, sql = b.partition("\n")
-        name, _, desc = head.partition(" | ")
-        out.append((name.strip(), desc.strip(), sql.strip()))
-    return out
+def parse_checks():
+    manifest = json.loads((RULES_DIR / "checks.json").read_text(encoding="utf-8"))
+    return [(m["name"], m["description"], (RULES_DIR / m["file"]).read_text(encoding="utf-8").strip()) for m in manifest]
 
 
 def main() -> int:
@@ -163,7 +157,7 @@ def main() -> int:
         have_mr = True
     else:
         have_mr = False
-    for name, desc, sql in parse_checks(RULES_SQL.read_text(encoding="utf-8")):
+    for name, desc, sql in parse_checks():
         if name.startswith("roll_forward") and not have_mr:
             continue
         cur.execute(sql)
