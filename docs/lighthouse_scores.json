@@ -1,0 +1,172 @@
+[
+  {
+    "form": "desktop",
+    "page": "executive",
+    "runs": 3,
+    "performance": 100,
+    "performanceAllRuns": [
+      100,
+      100,
+      100
+    ],
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcpMs": 677,
+    "tbtMs": 4,
+    "failingAudits": []
+  },
+  {
+    "form": "desktop",
+    "page": "client-health",
+    "runs": 3,
+    "performance": 85,
+    "performanceAllRuns": [
+      85,
+      85,
+      100
+    ],
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcpMs": 733,
+    "tbtMs": 0,
+    "failingAudits": []
+  },
+  {
+    "form": "desktop",
+    "page": "advisors",
+    "runs": 3,
+    "performance": 100,
+    "performanceAllRuns": [
+      100,
+      100,
+      100
+    ],
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcpMs": 550,
+    "tbtMs": 0,
+    "failingAudits": []
+  },
+  {
+    "form": "desktop",
+    "page": "data-quality",
+    "runs": 3,
+    "performance": 100,
+    "performanceAllRuns": [
+      100,
+      100,
+      100
+    ],
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcpMs": 557,
+    "tbtMs": 0,
+    "failingAudits": []
+  },
+  {
+    "form": "desktop",
+    "page": "methodology",
+    "runs": 3,
+    "performance": 100,
+    "performanceAllRuns": [
+      100,
+      100,
+      99
+    ],
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcpMs": 566,
+    "tbtMs": 0,
+    "failingAudits": []
+  },
+  {
+    "form": "mobile",
+    "page": "executive",
+    "runs": 3,
+    "performance": 84,
+    "performanceAllRuns": [
+      84,
+      84,
+      84
+    ],
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcpMs": 3119,
+    "tbtMs": 30,
+    "failingAudits": []
+  },
+  {
+    "form": "mobile",
+    "page": "client-health",
+    "runs": 3,
+    "performance": 72,
+    "performanceAllRuns": [
+      71,
+      72,
+      72
+    ],
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcpMs": 3305,
+    "tbtMs": 102,
+    "failingAudits": []
+  },
+  {
+    "form": "mobile",
+    "page": "advisors",
+    "runs": 3,
+    "performance": 73,
+    "performanceAllRuns": [
+      73,
+      95,
+      41
+    ],
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcpMs": 2930,
+    "tbtMs": 596,
+    "failingAudits": []
+  },
+  {
+    "form": "mobile",
+    "page": "data-quality",
+    "runs": 3,
+    "performance": 84,
+    "performanceAllRuns": [
+      83,
+      97,
+      84
+    ],
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcpMs": 2359,
+    "tbtMs": 379,
+    "failingAudits": []
+  },
+  {
+    "form": "mobile",
+    "page": "methodology",
+    "runs": 3,
+    "performance": 89,
+    "performanceAllRuns": [
+      64,
+      95,
+      89
+    ],
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcpMs": 2217,
+    "tbtMs": 174,
+    "failingAudits": []
+  }
+]

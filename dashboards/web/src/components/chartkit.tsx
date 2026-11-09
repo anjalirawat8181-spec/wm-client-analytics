@@ -95,3 +95,22 @@ export function ChartFrame({ label, height = 280, children }: { label: string; h
     </div>
   );
 }
+
+/** Mounts its children only once it is near the viewport (for heavy tables below the fold). */
+export function LazyBlock({ minHeight = 200, children }: { minHeight?: number; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(() => typeof IntersectionObserver === "undefined");
+  useEffect(() => {
+    const el = ref.current;
+    if (visible || !el) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        setVisible(true);
+        io.disconnect();
+      }
+    }, { rootMargin: "300px 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [visible]);
+  return <div ref={ref} style={visible ? undefined : { minHeight }}>{visible ? children : <div className="skeleton w-full" style={{ height: minHeight }} aria-hidden="true" />}</div>;
+}

@@ -8,7 +8,7 @@ import { formatInt, formatMonth, formatMonthShort, formatPct, formatRupees } fro
 import type { AtRiskRow, AttritionFile, CohortFile, CubeRow, RiskRow, Summary } from "../lib/types";
 import { SEGMENTS } from "../lib/types";
 import { Badge, Card, Chip, EmptyState, ErrorState, Footnote, PageHeader, Skeleton } from "../components/ui";
-import { AXIS, ChartFrame, ChartTooltip, GRID, RISK_COLORS, SEGMENT_COLORS, ToggleLegend, useSeriesToggle } from "../components/chartkit";
+import { AXIS, ChartFrame, ChartTooltip, GRID, LazyBlock, RISK_COLORS, SEGMENT_COLORS, ToggleLegend, useSeriesToggle } from "../components/chartkit";
 
 const PAGE = 10;
 
@@ -204,7 +204,7 @@ export default function ClientHealth() {
         </Card>
 
         <Card title="Cohort retention" subtitle="Share of each onboarding-month cohort still active, by months since joining">
-          {coh.error ? <ErrorState message={coh.error} /> : !coh.data ? <Skeleton className="h-64" /> : <Heatmap data={coh.data} />}
+          {coh.error ? <ErrorState message={coh.error} /> : !coh.data ? <Skeleton className="h-64" /> : <LazyBlock minHeight={420}><Heatmap data={coh.data} /></LazyBlock>}
         </Card>
       </div>
 
