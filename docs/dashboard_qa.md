@@ -57,3 +57,6 @@ Screenshots (`docs/screenshots/`): advisors-dark.png, advisors-light.png, adviso
 - Y-axis labels wrapped onto two lines and the allocation axis showed 100.01%; widened the axes and rounded the ticks.
 - Light theme: gold, green and heatmap text failed the contrast audit; darkened the light-theme colours and simplified heatmap text colour.
 - Cohort retention showed 0% for January 2025 joiners because the generator creates no holdings for them; the cohort is excluded from the view and the reason is documented.
+## Live site check
+
+After the first deployment, the published site (https://anjalirawat8181-spec.github.io/wm-client-analytics/) was opened in a real browser with `BASE_URL=<live url> PREFIX=live- MODES=dark node scripts/screenshots.mjs`. All 5 pages loaded, charts rendered, there were no console errors, failed requests or horizontal scroll, and `data/meta.json` on the live site carried the build time and commit of the deployment. Screenshots: live-advisors-dark.png, live-client-health-dark.png, live-data-quality-dark.png, live-executive-dark.png, live-methodology-dark.png

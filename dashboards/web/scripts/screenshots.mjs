@@ -16,12 +16,13 @@ const PAGES = [
   ["data-quality", "#/data-quality"],
   ["methodology", "#/methodology"],
 ];
-const MODES = [
+const ALL_MODES = [
   { name: "dark", scheme: "dark", viewport: { width: 1440, height: 900 } },
   { name: "light", scheme: "light", viewport: { width: 1440, height: 900 } },
   { name: "mobile", scheme: "dark", viewport: { width: 390, height: 844 }, mobile: true },
 ];
 
+const MODES = process.env.MODES ? ALL_MODES.filter((m) => process.env.MODES.split(",").includes(m.name)) : ALL_MODES;
 const browser = await chromium.launch();
 let problems = 0;
 for (const mode of MODES) {
