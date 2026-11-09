@@ -23,40 +23,41 @@ Month-end 2026-10-31. The SQL side reads the mart tables directly for the headli
 | Data quality: planted defects caught equals rows in the exceptions table | 18,198 | 18,198 | PASS |
 | Data quality: rows logged and kept out of the KPIs (exceptions minus repaired KYC rows) | 18,073 | 18,073 | PASS |
 | Data quality: staged rows | 7,70,759 | 7,70,759 | PASS |
-| Advisors: top growth advisor (23) NNM per client | Rs 97.88 lakh | Rs 97.88 lakh | PASS |
+| Advisors: net flow rate of the top-ranked advisor (23) | 43.0% | 43.0% | PASS |
 
 **16 of 16 match.**
 
 ## Lighthouse
 
-Edge (Chromium) headless against the production build served by `vite preview`; each page run 3 times, median reported. Mobile uses Lighthouse's default throttling (4x CPU slowdown, slow 4G). Scores on this machine vary between runs, so the individual performance runs are shown. The Client Health mobile row was re-measured (3 runs) after deferring the heatmap until it scrolls into view; the other rows come from the earlier full run on the same build otherwise. Desktop passes 90 on every page except Client Health (85); mobile scores are 72 to 89 because of the chart library bundle under 4x CPU throttling, so the aim of 90+ performance is met on desktop only (4 of 5 pages) and not on mobile.
+Edge (Chromium) headless against the production build served by `vite preview`. Mobile pages were run 5 times each and desktop pages 3 times; the median is reported with every individual performance run. Mobile uses Lighthouse's default throttling (4x CPU slowdown, slow 4G). The charts are hand-built SVG, the only runtime dependency is React, the font is a self-hosted 18 KB subset embedded in the stylesheet, and each page loads only its own JSON.
 
 | Form | Page | Performance (runs) | Accessibility | Best practices | SEO | LCP ms | TBT ms |
 |---|---|---|---|---|---|---:|---:|
-| desktop | executive | 100 (100/100/100) | 100 | 100 | 100 | 677 | 4 |
-| desktop | client-health | 85 (85/85/100) | 100 | 100 | 100 | 733 | 0 |
-| desktop | advisors | 100 (100/100/100) | 100 | 100 | 100 | 550 | 0 |
-| desktop | data-quality | 100 (100/100/100) | 100 | 100 | 100 | 557 | 0 |
-| desktop | methodology | 100 (100/100/99) | 100 | 100 | 100 | 566 | 0 |
-| mobile | executive | 84 (84/84/84) | 100 | 100 | 100 | 3119 | 30 |
-| mobile | client-health | 72 (71/72/72) | 100 | 100 | 100 | 3305 | 102 |
-| mobile | advisors | 73 (73/95/41) | 100 | 100 | 100 | 2930 | 596 |
-| mobile | data-quality | 84 (83/97/84) | 100 | 100 | 100 | 2359 | 379 |
-| mobile | methodology | 89 (64/95/89) | 100 | 100 | 100 | 2217 | 174 |
+| desktop | executive | 98 (98/98/98) | 100 | 100 | 100 | 492 | 0 |
+| desktop | client-health | 98 (98/98/98) | 100 | 100 | 100 | 498 | 0 |
+| desktop | advisors | 98 (98/98/98) | 100 | 100 | 100 | 484 | 0 |
+| desktop | data-quality | 98 (98/98/98) | 100 | 100 | 100 | 471 | 0 |
+| desktop | methodology | 98 (98/98/98) | 100 | 100 | 100 | 478 | 0 |
+| mobile | executive | 99 (99/99/99/99/99) | 100 | 100 | 100 | 1829 | 13 |
+| mobile | client-health | 99 (99/99/99/96/98) | 100 | 100 | 100 | 1978 | 7 |
+| mobile | advisors | 99 (99/99/99/99/99) | 100 | 100 | 100 | 1825 | 0 |
+| mobile | data-quality | 99 (99/99/99/99/99) | 100 | 100 | 100 | 1821 | 0 |
+| mobile | methodology | 99 (99/99/99/99/99) | 100 | 100 | 100 | 1972 | 6 |
 
 ## Browser checks
 
-`dashboards/web/scripts/screenshots.mjs` opened every page in dark, light and a 390 px mobile viewport. It fails on any console error, failed request or horizontal scroll; the last run reported none. Charts are mounted lazily as they scroll into view, so the script resizes the viewport to the full page height before capturing.
+`dashboards/web/scripts/screenshots.mjs` opened every page in dark, light and a 390 px mobile viewport. It fails on any console error, failed request or horizontal scroll; the last run reported none. Charts mount as they scroll into view, so the script resizes the viewport to the full page height before capturing.
 
 Screenshots (`docs/screenshots/`): advisors-dark.png, advisors-light.png, advisors-mobile.png, client-health-dark.png, client-health-light.png, client-health-mobile.png, data-quality-dark.png, data-quality-light.png, data-quality-mobile.png, executive-dark.png, executive-light.png, executive-mobile.png, methodology-dark.png, methodology-light.png, methodology-mobile.png
 
 ## Defects found and fixed while inspecting the screenshots
 
-- Mobile: grid cards grew wider than the screen because a wide table or heatmap sat inside a grid column; fixed with `min-w-0` and single-column grids.
-- Charts looked empty in full-page captures because resizing the viewport restarted their mount animation; the capture script now resizes first and waits.
-- Y-axis labels wrapped onto two lines and the allocation axis showed 100.01%; widened the axes and rounded the ticks.
-- Light theme: gold, green and heatmap text failed the contrast audit; darkened the light-theme colours and simplified heatmap text colour.
+- The first mobile Lighthouse runs scored 84 because a late-arriving font reflowed the text (layout shift 0.31); embedding the font in the stylesheet removed the shift and raised every mobile page to 99.
+- Y-axis labels were clipped on narrow screens and the end-of-axis month labels overlapped; margins and label spacing now adapt to the chart width, and series names move into a legend row on phones.
+- The risk donut was squeezed in a flex row; it no longer shrinks.
+- A focus outline showed around the whole page after navigation; it is now suppressed on the main container only, while every control keeps a visible focus ring.
 - Cohort retention showed 0% for January 2025 joiners because the generator creates no holdings for them; the cohort is excluded from the view and the reason is documented.
+
 ## Live site check
 
-After the first deployment, the published site (https://anjalirawat8181-spec.github.io/wm-client-analytics/) was opened in a real browser with `BASE_URL=<live url> PREFIX=live- MODES=dark node scripts/screenshots.mjs`. All 5 pages loaded, charts rendered, there were no console errors, failed requests or horizontal scroll, and `data/meta.json` on the live site carried the build time and commit of the deployment. Screenshots: live-advisors-dark.png, live-client-health-dark.png, live-data-quality-dark.png, live-executive-dark.png, live-methodology-dark.png
+After the first deployment, the published site (https://anjalirawat8181-spec.github.io/wm-client-analytics/) was opened in a real browser with `BASE_URL=<live url> PREFIX=live- MODES=dark node scripts/screenshots.mjs`. All 5 pages loaded, charts rendered, there were no console errors, failed requests or horizontal scroll, and `data/meta.json` on the live site carried the build time and commit of the deployment. Screenshots: 

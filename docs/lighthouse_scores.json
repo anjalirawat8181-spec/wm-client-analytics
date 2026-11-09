@@ -3,33 +3,33 @@
     "form": "desktop",
     "page": "executive",
     "runs": 3,
-    "performance": 100,
+    "performance": 98,
     "performanceAllRuns": [
-      100,
-      100,
-      100
+      98,
+      98,
+      98
     ],
     "accessibility": 100,
     "bestPractices": 100,
     "seo": 100,
-    "lcpMs": 677,
-    "tbtMs": 4,
+    "lcpMs": 492,
+    "tbtMs": 0,
     "failingAudits": []
   },
   {
     "form": "desktop",
     "page": "client-health",
     "runs": 3,
-    "performance": 85,
+    "performance": 98,
     "performanceAllRuns": [
-      85,
-      85,
-      100
+      98,
+      98,
+      98
     ],
     "accessibility": 100,
     "bestPractices": 100,
     "seo": 100,
-    "lcpMs": 733,
+    "lcpMs": 498,
     "tbtMs": 0,
     "failingAudits": []
   },
@@ -37,16 +37,16 @@
     "form": "desktop",
     "page": "advisors",
     "runs": 3,
-    "performance": 100,
+    "performance": 98,
     "performanceAllRuns": [
-      100,
-      100,
-      100
+      98,
+      98,
+      98
     ],
     "accessibility": 100,
     "bestPractices": 100,
     "seo": 100,
-    "lcpMs": 550,
+    "lcpMs": 484,
     "tbtMs": 0,
     "failingAudits": []
   },
@@ -54,16 +54,16 @@
     "form": "desktop",
     "page": "data-quality",
     "runs": 3,
-    "performance": 100,
+    "performance": 98,
     "performanceAllRuns": [
-      100,
-      100,
-      100
+      98,
+      98,
+      98
     ],
     "accessibility": 100,
     "bestPractices": 100,
     "seo": 100,
-    "lcpMs": 557,
+    "lcpMs": 471,
     "tbtMs": 0,
     "failingAudits": []
   },
@@ -71,102 +71,114 @@
     "form": "desktop",
     "page": "methodology",
     "runs": 3,
-    "performance": 100,
+    "performance": 98,
     "performanceAllRuns": [
-      100,
-      100,
+      98,
+      98,
+      98
+    ],
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcpMs": 478,
+    "tbtMs": 0,
+    "failingAudits": [
+      "bf-cache"
+    ]
+  },
+  {
+    "form": "mobile",
+    "page": "executive",
+    "runs": 5,
+    "performance": 99,
+    "performanceAllRuns": [
+      99,
+      99,
+      99,
+      99,
       99
     ],
     "accessibility": 100,
     "bestPractices": 100,
     "seo": 100,
-    "lcpMs": 566,
-    "tbtMs": 0,
-    "failingAudits": []
-  },
-  {
-    "form": "mobile",
-    "page": "executive",
-    "runs": 3,
-    "performance": 84,
-    "performanceAllRuns": [
-      84,
-      84,
-      84
-    ],
-    "accessibility": 100,
-    "bestPractices": 100,
-    "seo": 100,
-    "lcpMs": 3119,
-    "tbtMs": 30,
+    "lcpMs": 1829,
+    "tbtMs": 13,
     "failingAudits": []
   },
   {
     "form": "mobile",
     "page": "client-health",
-    "runs": 3,
-    "performance": 72,
+    "runs": 5,
+    "performance": 99,
     "performanceAllRuns": [
-      71,
-      72,
-      72
+      99,
+      99,
+      99,
+      96,
+      98
     ],
     "accessibility": 100,
     "bestPractices": 100,
     "seo": 100,
-    "lcpMs": 3305,
-    "tbtMs": 102,
+    "lcpMs": 1978,
+    "tbtMs": 7,
     "failingAudits": []
   },
   {
     "form": "mobile",
     "page": "advisors",
-    "runs": 3,
-    "performance": 73,
+    "runs": 5,
+    "performance": 99,
     "performanceAllRuns": [
-      73,
-      95,
-      41
+      99,
+      99,
+      99,
+      99,
+      99
     ],
     "accessibility": 100,
     "bestPractices": 100,
     "seo": 100,
-    "lcpMs": 2930,
-    "tbtMs": 596,
+    "lcpMs": 1825,
+    "tbtMs": 0,
     "failingAudits": []
   },
   {
     "form": "mobile",
     "page": "data-quality",
-    "runs": 3,
-    "performance": 84,
+    "runs": 5,
+    "performance": 99,
     "performanceAllRuns": [
-      83,
-      97,
-      84
+      99,
+      99,
+      99,
+      99,
+      99
     ],
     "accessibility": 100,
     "bestPractices": 100,
     "seo": 100,
-    "lcpMs": 2359,
-    "tbtMs": 379,
+    "lcpMs": 1821,
+    "tbtMs": 0,
     "failingAudits": []
   },
   {
     "form": "mobile",
     "page": "methodology",
-    "runs": 3,
-    "performance": 89,
+    "runs": 5,
+    "performance": 99,
     "performanceAllRuns": [
-      64,
-      95,
-      89
+      99,
+      99,
+      99,
+      99,
+      99
     ],
     "accessibility": 100,
     "bestPractices": 100,
     "seo": 100,
-    "lcpMs": 2217,
-    "tbtMs": 174,
+    "lcpMs": 1972,
+    "tbtMs": 6,
     "failingAudits": []
   }
 ]
