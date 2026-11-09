@@ -28,9 +28,9 @@ Among active clients whose AUM fell by more than 50% over three month-ends, 87.9
 
 ## Finding 4: advisors differ most in how often they reach clients
 
-Contact frequency (connected interactions per active client-month) runs from 0.12 to 1.07 across the 60 advisors, with a median of 0.56. The five advisors planted as low-contact were all found among the bottom ten. Growth is harder to read: net new money per client over 12 months runs from about minus Rs 9.9 lakh to Rs 97.9 lakh (median Rs 4.05 lakh), but it depends on a few large deposits. Only 1 of the 5 advisors planted as high-growth appears in the top ten on that measure, so the growth ranking should not be used to rank individuals.
+Contact frequency (connected interactions per active client-month) runs from 0.12 to 1.07 across the 60 advisors, with a median of 0.56. The five advisors planted as low-contact were all found among the bottom ten. Growth is harder to read. Measured as net flow rate (12-month net new money over opening AUM), the five advisors planted as high-growth average 14.9% against 7.4% for the rest, but only 2 of them appear in the top ten because individual advisors overlap heavily over a single year. The ranking should not be used to rank individuals.
 
-**Recommendation.** Coach the bottom decile on contact frequency now. For growth, review a rolling multi-year view and normalise by assets before using it in reviews.
+**Recommendation.** Coach the bottom decile on contact frequency now. For growth, use a rolling multi-year view before using it in reviews.
 
 ## What this memo does not claim
 

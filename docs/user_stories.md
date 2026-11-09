@@ -22,7 +22,7 @@ Status is "Done" only where a person can use it today. "Data only" means the vie
 | 9 | As an advisor I want to take the call list away | CSV download of the current filtered list | Client Health page | Done |
 | 10 | As an advisor I want to see clients with idle cash to start a conversation | Clients with cash above 30% for 2+ month-ends | `v_flags` (idle_flag); appears only as a reason chip | Data only |
 | 11 | As an advisor I want to see clients concentrated in one product | Largest non-cash product above 40% of AUM | `v_flags` (concentrated_flag) | Data only |
-| 12 | As an advisor I want to compare my contact frequency and growth with peers | Sortable table of all advisors with contacts per client-month and NNM per client | Advisors page; `v_advisor_scorecard` | Done |
+| 12 | As an advisor I want to compare my contact frequency and net flow rate with peers | Sortable table of all advisors with contacts per client-month and 12-month net flow rate | Advisors page; `v_advisor_scorecard` | Done |
 
 ## Data steward
 

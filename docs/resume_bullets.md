@@ -13,5 +13,5 @@ Pick the wording that matches what you can explain in an interview. Every number
 - **JIRA sprints.** Claim sprint delivery only for sprints you actually ran. The board screenshots in `docs/` show Sprint 1; the ticket statuses are updated by hand.
 - **Real data or real business results.** All data is synthetic. Say "synthetic data with planted patterns", not "reduced attrition" or "increased AUM".
 - **Predictive modelling.** The churn risk score is a transparent rule set, not a trained model. Say "rule-based risk scoring".
-- **Advisor growth ranking.** It did not reliably recover the planted high-growth advisors (1 of 5 in the top ten); do not present it as a working performance measure.
+- **Advisor growth ranking.** Ranking advisors by net flow rate (12-month net new money over opening AUM) placed 2 of the 5 planted high-growth advisors in the top ten, below the 4 required, although the group's average rate was about twice that of other advisors; do not present it as a reliable per-advisor performance measure.
 - **Live or real-time.** The dashboard is a weekly snapshot.

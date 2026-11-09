@@ -67,7 +67,7 @@ def build_expected():
     grid = grid.sort_values(["client_id", "snapshot_date"]).reset_index(drop=True)
     g = grid.groupby("client_id")
     grid["was_active"] = g.active.shift(1)
-    grid["churned"] = (grid.was_active == True) & (~grid.active)  # noqa: E712
+    grid["churned"] = grid.was_active.eq(True) & (~grid.active)
     grid["idle_pct"] = np.where(grid.aum >= ACTIVE_MIN, grid.cash / grid.aum.replace(0, np.nan), np.nan)
     grid["conc_pct"] = np.where((grid.aum >= ACTIVE_MIN) & grid.top.notna(), grid.top / grid.aum.replace(0, np.nan), np.nan)
     above = (grid.idle_pct > 0.30)
@@ -112,7 +112,7 @@ def main() -> int:
     rec("NNM", f"firm NNM matches in all {len(v)} months", "equal", "equal" if ok else "differs", ok)
 
     # 3. Attrition (opening, churned) by month and segment
-    ex = grid.groupby(["snapshot_date", "segment"]).agg(opening=("was_active", lambda s: int((s == True).sum())),  # noqa: E712
+    ex = grid.groupby(["snapshot_date", "segment"]).agg(opening=("was_active", lambda s: int(s.eq(True).sum())),
                                                        churned=("churned", "sum")).reset_index()
     gv = q(cur, "select snapshot_date, segment, opening_clients, churned_clients from analytics.v_attrition_monthly where segment<>'All'")
     gv["snapshot_date"] = pd.to_datetime(gv.snapshot_date)
@@ -165,8 +165,8 @@ def main() -> int:
     gg["act12"] = gg.groupby("client_id").active.shift(12)
     gg["roll"] = gg.groupby("client_id").churned.transform(lambda s: s.astype(int).rolling(12, min_periods=1).max())
     lm = gg[gg.snapshot_date == months[-1]]
-    t12 = (lm.act12 == True) & (lm.roll == 1)  # noqa: E712
-    e12 = t12.sum() / (lm.act12 == True).sum()  # noqa: E712
+    t12 = lm.act12.eq(True) & (lm.roll == 1)
+    e12 = t12.sum() / lm.act12.eq(True).sum()
     v12 = float(q(cur, "select attrition_trailing_12m a from analytics.v_attrition_trailing12 where segment='All' order by snapshot_date desc limit 1").a[0])
     rec("Trailing 12m attrition", "latest month", f"{e12:.6f}", f"{v12:.6f}", abs(e12 - v12) < 1e-9)
 
@@ -189,25 +189,33 @@ def main() -> int:
         rec(f"{prof} vs truth", "precision", f">={THRESHOLDS[key + '_precision']}", f"{prc:.4f}", prc >= THRESHOLDS[key + "_precision"], strict=False, gap=True)
 
     ar = pd.read_csv(TRUTH / "advisor_roles.csv")
-    sc = q(cur, "select advisor_id, growth_rank, nnm_per_client, contacts_per_client_month, contact_rank from analytics.v_advisor_scorecard")
+    sc = q(cur, "select advisor_id, growth_rank, net_flow_rate, nnm_per_client, contacts_per_client_month, contact_rank from analytics.v_advisor_scorecard")
     sc["advisor_id"] = sc.advisor_id.astype(int)
+    win = months[-12:]
+    nn = txn[txn.me.isin(win)].merge(cli[["client_id", "advisor_id"]], on="client_id").groupby("advisor_id").flow.sum()
+    opening = grid[grid.snapshot_date == months[-13]].groupby("advisor_id").aum.sum()
+    expected_rate = (nn / opening).dropna()
+    got_rate = sc.set_index("advisor_id").net_flow_rate.astype(float)
+    same = int(((got_rate.reindex(expected_rate.index) - expected_rate).abs() < 1e-9).sum())
+    rec("Net flow rate", "advisors whose trailing 12-month NNM / opening AUM matches pandas", len(expected_rate), same, same == len(expected_rate))
     stars = set(ar[ar.role == "star"].advisor_id)
     poor = set(ar[ar.role == "poor_contact"].advisor_id)
-    top10 = set(sc.sort_values("nnm_per_client", ascending=False).head(10).advisor_id)
+    top10 = set(sc.sort_values("net_flow_rate", ascending=False).head(10).advisor_id)
+    top10_per_client = set(sc.sort_values("nnm_per_client", ascending=False).head(10).advisor_id)
     bot10 = set(sc.sort_values("contacts_per_client_month").head(10).advisor_id)
-    rec("Star advisors", "stars inside top 10 by NNM per client (of 5)", f">={THRESHOLDS['star_in_top10']}", len(stars & top10), len(stars & top10) >= THRESHOLDS["star_in_top10"], strict=False, gap=True)
+    rec("Star advisors", "stars inside top 10 by net flow rate: trailing 12-month NNM / opening AUM (of 5)", f">={THRESHOLDS['star_in_top10']}", len(stars & top10), len(stars & top10) >= THRESHOLDS["star_in_top10"], strict=False, gap=True)
     rec("Poor-contact advisors", "inside bottom 10 by contacts per client-month (of 5)", f">={THRESHOLDS['poor_in_bottom10']}", len(poor & bot10), len(poor & bot10) >= THRESHOLDS["poor_in_bottom10"], strict=False, gap=True)
-    top5 = set(sc.sort_values("nnm_per_client", ascending=False).head(5).advisor_id)
+    top5 = set(sc.sort_values("net_flow_rate", ascending=False).head(5).advisor_id)
     bot5 = set(sc.sort_values("contacts_per_client_month").head(5).advisor_id)
-    rec("Star advisors", "stars inside top 5 (informational)", "5", len(stars & top5), len(stars & top5) == 5, strict=False)
+    roles = ar.set_index("advisor_id").role
+    rate_by_role = sc.set_index("advisor_id").net_flow_rate.astype(float).groupby(roles).mean()
+    rec("Star advisors", "average net flow rate: star advisors against normal advisors (informational)", "stars higher",
+        f"stars {100 * rate_by_role['star']:.1f}% vs normal {100 * rate_by_role['normal']:.1f}%", bool(rate_by_role["star"] > rate_by_role["normal"]), strict=False)
+    rec("Star advisors", "stars inside top 5 by net flow rate (informational)", "5", len(stars & top5), len(stars & top5) == 5, strict=False)
     rec("Poor-contact advisors", "inside bottom 5 (informational)", "5", len(poor & bot5), len(poor & bot5) == 5, strict=False)
 
     # extra, informational only: the same stars ranked by trailing-12-month NNM as % of AUM (the strict check above is NOT replaced)
-    lastm = [d for d in months][-12:]
-    nn = txn[(txn.me >= lastm[0])].merge(cli[["client_id", "advisor_id"]], on="client_id").groupby("advisor_id").flow.sum()
-    ab = grid[grid.snapshot_date == months[-1]].groupby("advisor_id").aum.sum()
-    pct = (nn / ab).sort_values(ascending=False)
-    rec("Star advisors", "stars inside top 10 by NNM as % of AUM (informational alternative metric)", "5", len(stars & set(pct.head(10).index)), False, strict=False)
+    rec("Star advisors", "stars inside top 10 by NNM per client, the measure used before the net flow rate (informational)", "5", len(stars & top10_per_client), False, strict=False)
 
     # 9. Churn risk score: does it point at next-month churners? (informational, with base-rate lift)
     rs = q(cur, "select client_id, snapshot_date, risk_level from analytics.v_churn_risk_score")

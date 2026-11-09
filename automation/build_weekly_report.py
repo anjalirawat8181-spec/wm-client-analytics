@@ -134,12 +134,12 @@ def main() -> int:
 
     # Advisors
     w5 = wb.create_sheet("Advisors")
-    header(w5, 1, ["Advisor", "Branch", "Team", "Active clients", "AUM (Rs crore)", "NNM 12m (Rs crore)", "NNM per client (Rs lakh)", "Contacts per client-month", "Growth rank", "Contact rank", "Flags"])
+    header(w5, 1, ["Advisor", "Branch", "Team", "Active clients", "AUM (Rs crore)", "NNM 12m (Rs crore)", "Net flow rate (12m)", "Contacts per client-month", "Growth rank", "Contact rank", "Flags"])
     for i, a in enumerate(sorted(adv["advisors"], key=lambda x: x["growth_rank"]), 2):
-        flags = ", ".join(f for f, on in (("High growth", a["nnm_decile"] == 1), ("Low contact", a["contact_decile"] == 1)) if on)
+        flags = ", ".join(f for f, on in (("Highest net flow rate", a["growth_decile"] == 1), ("Lowest contact", a["contact_decile"] == 1)) if on)
         w5.append([f"Advisor {a['advisor_id']}", a["branch"], a["team"], a["active_clients"], (a["aum"] or 0) / CR, (a["nnm_12m"] or 0) / CR,
-                   (a["nnm_per_client"] or 0) / 1e5, a["contacts_per_client_month"], a["growth_rank"], a["contact_rank"], flags])
-        for col, f in zip("EFGH", ["#,##0.00", "#,##0.00", "#,##0.00", "0.00"]):
+                   a["net_flow_rate"], a["contacts_per_client_month"], a["growth_rank"], a["contact_rank"], flags])
+        for col, f in zip("EFGH", ["#,##0.00", "#,##0.00", "0.0%", "0.00"]):
             w5[f"{col}{i}"].number_format = f
     w5.conditional_formatting.add(f"G2:G{len(adv['advisors']) + 1}", DataBarRule(start_type="min", end_type="max", color="6C7CFF"))
     w5.conditional_formatting.add(f"H2:H{len(adv['advisors']) + 1}", ColorScaleRule(start_type="min", start_color="F2646A", end_type="max", end_color="3CCFB4"))

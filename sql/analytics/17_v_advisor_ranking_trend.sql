@@ -1,8 +1,9 @@
 -- View: analytics.v_advisor_ranking_trend
 -- Business question: Is an advisor climbing or slipping against peers over time?
--- KPI dictionary refs: AUM, Net New Money (rolling 3 months).
+-- KPI dictionary refs: AUM, Net New Money (rolling 3 and 12 months); net flow rate = rolling 12-month NNM / AUM 12 month-ends earlier.
 -- Grain: one row per advisor x month-end.
--- Techniques: DENSE_RANK per month, SUM OVER a 3-row frame, LAG of the previous rank.
+-- Techniques: DENSE_RANK per month, SUM OVER 3-row and 12-row frames, LAG of the previous rank and of AUM 12 months back.
+--   net_flow_rate and its rank exist from the 13th month-end onward.
 CREATE OR REPLACE VIEW analytics.v_advisor_ranking_trend AS
 WITH m AS (
     SELECT k.advisor_id, k.snapshot_date,
@@ -16,11 +17,16 @@ WITH m AS (
 r AS (
     SELECT m.*,
            sum(m.nnm) OVER (PARTITION BY m.advisor_id ORDER BY m.snapshot_date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS nnm_3m,
+           CASE WHEN lag(m.aum, 12) OVER w > 0
+                THEN sum(m.nnm) OVER (w ROWS BETWEEN 11 PRECEDING AND CURRENT ROW) / lag(m.aum, 12) OVER w END AS net_flow_rate,
            dense_rank() OVER (PARTITION BY m.snapshot_date ORDER BY m.aum DESC) AS aum_rank
     FROM m
+    WINDOW w AS (PARTITION BY m.advisor_id ORDER BY m.snapshot_date)
 ),
 r2 AS (
-    SELECT r.*, dense_rank() OVER (PARTITION BY r.snapshot_date ORDER BY r.nnm_3m DESC) AS nnm_3m_rank FROM r
+    SELECT r.*, CASE WHEN r.net_flow_rate IS NOT NULL
+                     THEN dense_rank() OVER (PARTITION BY r.snapshot_date ORDER BY r.net_flow_rate DESC NULLS LAST) END AS net_flow_rank
+    FROM r
 )
 SELECT r2.*,
        lag(r2.aum_rank) OVER (PARTITION BY r2.advisor_id ORDER BY r2.snapshot_date) AS prev_aum_rank,
